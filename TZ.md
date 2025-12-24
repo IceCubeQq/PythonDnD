@@ -8,9 +8,11 @@
    Обычный пользователь - может просматривать утвержденную информацию или предлагать дополнительный контент на рассмотрение администраторам
 3. Модели данных:
     Монстр (Monster)
-    - Поля: name (Название существа), size(Размер), type(Тип), armor_class(Класс доспехов), hit_points(Уровни жизней), speed(Скорость), strength(Сила), dexterity(Ловкость), constitution(Телосложение), intelligence(Интеллект), wisdom(Мудрость), charisma(Харизма) 
+    - Поля: name (Название существа), size(Размер), type(Тип), armor_class(Класс доспехов), hit_points(Уровни жизней), speed(Скорость), strength(Сила), dexterity(Ловкость), constitution(Телосложение), intelligence(Интеллект), wisdom(Мудрость), charisma(Харизма)
+   
     Заклинание (Spell)
     - Поля: name(Название заклинания), desc(Описание), range(Дальность), components(Компоненты), duration(Продолжительность), casting_time(Время накладывания), level(Уровень), school(Школа)
+   
     Класс (Class)
     - Поля: name(Название класса), hit_die(Кость хитов), proficiency_choices(Повышение навыка), proficiencies(Владения), starting_equipment(Стартовое снаряжение) 
 4. Ключевой функционал:
