@@ -1,6 +1,5 @@
 from django.db import models
 
-# Create your models here.
 class Monster(models.Model):
     name = models.CharField("Название", max_length=50)
     size = models.TextField("Размер")

@@ -1,4 +1,280 @@
-from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.http import require_GET
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.core.paginator import Paginator
+from django.db.models import Q, Count, Avg
+from .models import Monster, Spell, Equipment, Armor_class, Speed, Component
+from .forms import MonsterForm, SpellForm, EquipmentForm, ArmorClassForm, SpeedForm, ComponentForm
 
-def index_page(request):
-    return render(request, 'index.html')
+
+
+def is_admin(user):
+    return user.is_authenticated and user.is_staff
+
+
+def apply_filters(request, queryset):
+    search = request.GET.get('search', '')
+    if search:
+        queryset = queryset.filter(name__icontains=search)
+    sort_by = request.GET.get('sort', 'name')
+    if sort_by in ['name', 'hit_points', 'strength']:
+        queryset = queryset.order_by(sort_by)
+
+    return queryset
+
+
+def index(request):
+    context = {
+        'monster_count': Monster.objects.count(),
+        'spell_count': Spell.objects.count(),
+        'equipment_count': Equipment.objects.count(),
+        'recent_monsters': Monster.objects.order_by('-id')[:5],
+        'recent_spells': Spell.objects.order_by('-id')[:5],
+    }
+    return render(request, 'DnDSite/index.html', context)
+
+
+def monster_list(request):
+    monsters_list = Monster.objects.all()
+    monsters_list = apply_filters(request, monsters_list)
+    paginator = Paginator(monsters_list, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'monsters': page_obj.object_list,
+        'total_count': monsters_list.count(),
+    }
+    return render(request, 'DnDSite/monster_list.html', context)
+
+
+def monster_detail(request, monster_id):
+    monster = get_object_or_404(Monster, id=monster_id)
+    armor_classes = Armor_class.objects.filter(monster=monster)
+    speeds = Speed.objects.filter(monster=monster)
+    def calculate_modifier(score):
+        return (score - 10) // 2
+
+    context = {
+        'monster': monster,
+        'armor_classes': armor_classes,
+        'speeds': speeds,
+        'strength_mod': calculate_modifier(monster.strength),
+        'dexterity_mod': calculate_modifier(monster.dexterity),
+        'constitution_mod': calculate_modifier(monster.constitution),
+        'intelligence_mod': calculate_modifier(monster.intelligence),
+        'wisdom_mod': calculate_modifier(monster.wisdom),
+        'charisma_mod': calculate_modifier(monster.charisma),
+    }
+
+    return render(request, 'DnDSite/monster_detail.html', context)
+
+
+def spell_list(request):
+    spells_list = Spell.objects.all()
+    level_filter = request.GET.get('level')
+    if level_filter and level_filter.isdigit():
+        spells_list = spells_list.filter(level=int(level_filter))
+    search = request.GET.get('search', '')
+    if search:
+        spells_list = spells_list.filter(Q(name__icontains=search) | Q(desc__icontains=search))
+    paginator = Paginator(spells_list, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'spells': page_obj.object_list,
+        'levels': range(0, 10),
+        'selected_level': level_filter,
+        'search_query': search,
+    }
+    return render(request, 'DnDSite/spell_list.html', context)
+
+
+def spell_detail(request, spell_id):
+    spell = get_object_or_404(Spell, id=spell_id)
+    components = Component.objects.filter(spell=spell)
+
+    context = {
+        'spell': spell,
+        'components': components,
+    }
+    return render(request, 'DnDSite/spell_detail.html', context)
+
+
+def equipment_list(request):
+    equipment_list = Equipment.objects.all()
+    search = request.GET.get('search', '')
+    if search:
+        equipment_list = equipment_list.filter(name__icontains=search)
+
+    sort_by = request.GET.get('sort', 'name')
+    if sort_by == 'name':
+        equipment_list = equipment_list.order_by('name')
+    elif sort_by == 'weight_asc':
+        equipment_list = equipment_list.order_by('weight')
+    elif sort_by == 'weight_desc':
+        equipment_list = equipment_list.order_by('-weight')
+    elif sort_by == 'price_asc':
+        equipment_list = equipment_list.order_by('cost_quantity')
+    elif sort_by == 'price_desc':
+        equipment_list = equipment_list.order_by('-cost_quantity')
+    paginator = Paginator(equipment_list, 12)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'equipment': page_obj.object_list,
+        'search_query': search,
+        'sort_by': sort_by,
+        'total_count': equipment_list.count(),
+    }
+    return render(request, 'DnDSite/equipment_list.html', context)
+
+def equipment_detail(request, equipment_id):
+    """Детальная информация о снаряжении"""
+    equipment = get_object_or_404(Equipment, id=equipment_id)
+
+    # Форматируем стоимость
+    if equipment.cost_quantity:
+        cost_display = f"{equipment.cost_quantity} {equipment.get_cost_unit_display()}"
+    else:
+        cost_display = "Бесплатно"
+
+    context = {
+        'equipment': equipment,
+        'cost_display': cost_display,
+    }
+    return render(request, 'DnDSite/equipment_detail.html', context)
+
+@login_required
+def add_monster(request):
+    if request.method == 'POST':
+        form = MonsterForm(request.POST)
+        armor_form = ArmorClassForm(request.POST, prefix='armor')
+        speed_form = SpeedForm(request.POST, prefix='speed')
+
+        if form.is_valid():
+            monster = form.save(commit=False)
+            monster.save()
+            if armor_form.is_valid() and armor_form.cleaned_data.get('value'):
+                armor = armor_form.save(commit=False)
+                armor.monster = monster
+                armor.save()
+
+            if speed_form.is_valid() and speed_form.cleaned_data.get('movement_type'):
+                speed = speed_form.save(commit=False)
+                speed.monster = monster
+                speed.save()
+
+            messages.success(request, 'Монстр успешно добавлен. Он будет рассмотрен администратором')
+            return redirect('monster_detail', monster_id=monster.id)
+    else:
+        form = MonsterForm()
+        armor_form = ArmorClassForm(prefix='armor')
+        speed_form = SpeedForm(prefix='speed')
+
+    context = {
+        'form': form,
+        'armor_form': armor_form,
+        'speed_form': speed_form,
+    }
+
+    return render(request, 'DnDSite/add_monster.html', context)
+
+
+@login_required
+def add_spell(request):
+    if request.method == 'POST':
+        form = SpellForm(request.POST)
+
+        if form.is_valid():
+            spell = form.save(commit=False)
+            spell.save()
+            components = request.POST.getlist('components')
+            for comp_type in components:
+                if comp_type in ['V', 'S', 'M']:
+                    Component.objects.get_or_create(
+                        spell=spell,
+                        type=comp_type
+                    )
+
+            messages.success(request, 'Заклинание успешно добавлено. Оно будет рассмотрено модератором')
+            return redirect('spell_detail', spell_id=spell.id)
+    else:
+        form = SpellForm()
+
+    context = {
+        'form': form,
+        'component_choices': Component.COMPONENT_TYPES,
+    }
+
+    return render(request, 'DnDSite/add_spell.html', context)
+
+
+@login_required
+def add_equipment(request):
+    if request.method == 'POST':
+        form = EquipmentForm(request.POST)
+
+        if form.is_valid():
+            equipment = form.save(commit=False)
+            equipment.save()
+
+            messages.success(request, 'Снаряжение успешно добавлено. Оно будет рассмотрено администратором')
+            return redirect('equipment_detail', equipment_id=equipment.id)
+    else:
+        form = EquipmentForm()
+
+    return render(request, 'DnDSite/add_equipment.html', {'form': form})
+
+@login_required
+@user_passes_test(is_admin)
+def admin_panel(request):
+    context = {
+        'pending_monsters': Monster.objects.all()[:10],
+        'pending_spells': Spell.objects.all()[:10],
+        'pending_equipment': Equipment.objects.all()[:10],
+        'user_count': 0,
+        'recent_activity': [],
+    }
+
+    return render(request, 'compendium/admin_panel.html', context)
+
+
+@require_GET
+def monster_filter_api(request):
+    size = request.GET.get('size', '')
+    monster_type = request.GET.get('type', '')
+
+    monsters = Monster.objects.all()
+
+    if size:
+        monsters = monsters.filter(size__iexact=size)
+    if monster_type:
+        monsters = monsters.filter(type__icontains=monster_type)
+    monsters = monsters[:20]
+    data = []
+    for monster in monsters:
+        armor_class = monster.armor_classes.first()
+        data.append({
+            'id': monster.id,
+            'name': monster.name,
+            'size': monster.size,
+            'type': monster.type,
+            'hit_points': monster.hit_points,
+            'armor_class': armor_class.value if armor_class else 10,
+            'url': f'/monsters/{monster.id}/',
+        })
+
+    return JsonResponse({
+        'success': True,
+        'count': len(data),
+        'filters': {'size': size, 'type': monster_type},
+        'monsters': data,
+    })
