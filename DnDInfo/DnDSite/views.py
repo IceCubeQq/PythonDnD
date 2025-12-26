@@ -38,7 +38,41 @@ def index(request):
 
 def monster_list(request):
     monsters_list = Monster.objects.all()
-    monsters_list = apply_filters(request, monsters_list)
+
+    search = request.GET.get('search', '')
+    if search:
+        monsters_list = monsters_list.filter(name__icontains=search)
+
+    # Фильтрация по размеру
+    size = request.GET.get('size', '')
+    if size:
+        monsters_list = monsters_list.filter(size=size)
+
+    # Фильтрация по типу
+    monster_type = request.GET.get('type', '')
+    if monster_type:
+        monsters_list = monsters_list.filter(type__icontains=monster_type)
+
+    # Сортировка
+    sort_by = request.GET.get('sort', 'name')
+    if sort_by == 'hit_points':
+        monsters_list = monsters_list.order_by('-hit_points')
+    elif sort_by == 'strength':
+        monsters_list = monsters_list.order_by('-strength')
+    elif sort_by == 'dexterity':
+        monsters_list = monsters_list.order_by('-dexterity')
+    elif sort_by == 'constitution':
+        monsters_list = monsters_list.order_by('-constitution')
+    elif sort_by == 'intelligence':
+        monsters_list = monsters_list.order_by('-intelligence')
+    elif sort_by == 'wisdom':
+        monsters_list = monsters_list.order_by('-wisdom')
+    elif sort_by == 'charisma':
+        monsters_list = monsters_list.order_by('-charisma')
+    else:
+        monsters_list = monsters_list.order_by('name')
+
+    # monsters_list = apply_filters(request, monsters_list)
     paginator = Paginator(monsters_list, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -47,6 +81,10 @@ def monster_list(request):
         'page_obj': page_obj,
         'monsters': page_obj.object_list,
         'total_count': monsters_list.count(),
+        'search_query': search,
+        'selected_size': size,
+        'selected_type': monster_type,
+        'sort_by': sort_by,
     }
     return render(request, 'DnDSite/monster_list.html', context)
 
@@ -76,11 +114,24 @@ def monster_detail(request, monster_id):
 def spell_list(request):
     spells_list = Spell.objects.all()
     level_filter = request.GET.get('level')
+    school = request.GET.get('school', '')
+    sort_by = request.GET.get('sort', 'name')
     if level_filter and level_filter.isdigit():
         spells_list = spells_list.filter(level=int(level_filter))
     search = request.GET.get('search', '')
     if search:
         spells_list = spells_list.filter(Q(name__icontains=search) | Q(desc__icontains=search))
+
+    if school:
+        spells_list = spells_list.filter(school=school)
+
+    if sort_by == 'name':
+        spells_list = spells_list.order_by('name')
+    elif sort_by == 'level':
+        spells_list = spells_list.order_by('level', 'name')
+    elif sort_by == 'school':
+        spells_list = spells_list.order_by('school', 'level', 'name')
+
     paginator = Paginator(spells_list, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -90,7 +141,9 @@ def spell_list(request):
         'spells': page_obj.object_list,
         'levels': range(0, 10),
         'selected_level': level_filter,
+        'selected_school': school,
         'search_query': search,
+        'sort_by': sort_by,
     }
     return render(request, 'DnDSite/spell_list.html', context)
 
@@ -112,6 +165,19 @@ def equipment_list(request):
     if search:
         equipment_list = equipment_list.filter(name__icontains=search)
 
+    cost_unit = request.GET.get('cost_unit', '')
+    if cost_unit:
+        equipment_list = equipment_list.filter(cost_unit=cost_unit)
+
+    weight_filter = request.GET.get('weight_filter', '')
+    if weight_filter:
+        if weight_filter == 'light':
+            equipment_list = equipment_list.filter(weight__lt=5)
+        elif weight_filter == 'medium':
+            equipment_list = equipment_list.filter(weight__range=(5, 15))
+        elif weight_filter == 'heavy':
+            equipment_list = equipment_list.filter(weight__gt=15)
+
     sort_by = request.GET.get('sort', 'name')
     if sort_by == 'name':
         equipment_list = equipment_list.order_by('name')
@@ -132,6 +198,8 @@ def equipment_list(request):
         'equipment': page_obj.object_list,
         'search_query': search,
         'sort_by': sort_by,
+        'selected_cost_unit': cost_unit,
+        'selected_weight_filter': weight_filter,
         'total_count': equipment_list.count(),
     }
     return render(request, 'DnDSite/equipment_list.html', context)

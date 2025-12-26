@@ -1,10 +1,12 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / '.env')
 
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-zj57nz$9o!tc-kh^u4v(ketv1!&yv1&#1sxk1qv(3z57@$k2q(')
-
+# SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-zj57nz$9o!tc-kh^u4v(ketv1!&yv1&#1sxk1qv(3z57@$k2q(')
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
@@ -93,4 +95,5 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-DND_API_BASE_URL = os.getenv('DND_API_URL', 'https://www.dnd5eapi.co/api/2014')
+# DND_API_BASE_URL = os.getenv('DND_API_URL', 'https://www.dnd5eapi.co/api/2014')
+DND_API_URL = os.getenv('DND_API_URL', 'https://www.dnd5eapi.co/api/2014')

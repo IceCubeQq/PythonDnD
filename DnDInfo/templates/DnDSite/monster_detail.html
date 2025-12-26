@@ -1,0 +1,63 @@
+{% extends "DnDSite/base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h2>{{ monster.name }}</h2>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <h4>Основная информация</h4>
+                <table class="table">
+                    <tr><td><strong>Размер:</strong></td><td>{{ monster.size }}</td></tr>
+                    <tr><td><strong>Тип:</strong></td><td>{{ monster.type }}</td></tr>
+                    <tr><td><strong>Здоровье:</strong></td><td>{{ monster.hit_points }} HP</td></tr>
+                </table>
+                
+                <h4>Классы брони</h4>
+                <ul>
+                    {% for armor in armor_classes %}
+                    <li>{{ armor.get_type_display }}: {{ armor.value }}</li>
+                    {% empty %}
+                    <li>Нет информации о броне</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            
+            <div class="col-md-6">
+                <h4>Характеристики</h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Характеристика</th>
+                            <th>Значение</th>
+                            <th>Модификатор</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Сила</td><td>{{ monster.strength }}</td><td>{{ strength_mod }}</td></tr>
+                        <tr><td>Ловкость</td><td>{{ monster.dexterity }}</td><td>{{ dexterity_mod }}</td></tr>
+                        <tr><td>Телосложение</td><td>{{ monster.constitution }}</td><td>{{ constitution_mod }}</td></tr>
+                        <tr><td>Интеллект</td><td>{{ monster.intelligence }}</td><td>{{ intelligence_mod }}</td></tr>
+                        <tr><td>Мудрость</td><td>{{ monster.wisdom }}</td><td>{{ wisdom_mod }}</td></tr>
+                        <tr><td>Харизма</td><td>{{ monster.charisma }}</td><td>{{ charisma_mod }}</td></tr>
+                    </tbody>
+                </table>
+                
+                <h4>Скорость</h4>
+                <ul>
+                    {% for speed in speeds %}
+                    <li>{{ speed.movement_type }}: {{ speed.value }}</li>
+                    {% empty %}
+                    <li>Нет информации о скорости</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer">
+        <a href="{% url 'monster_list' %}" class="btn btn-secondary">Назад к списку</a>
+    </div>
+</div>
+{% endblock %}

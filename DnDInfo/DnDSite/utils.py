@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class DndApiClient:
     def __init__(self):
-        self.base_url = settings.DND_API_BASE_URL
+        self.base_url = settings.DND_API_URL
 
     def _make_request(self, endpoint):
         url = f"{self.base_url}/{endpoint.lstrip('/')}"
@@ -102,6 +102,9 @@ class DataImporter:
             return None
 
         try:
+            school_data = data.get('school', {})
+            school_key = school_data.get('index', '')
+
             school_mapping = {
                 'abjuration': 'abjuration',
                 'conjuration': 'conjuration',
@@ -113,7 +116,7 @@ class DataImporter:
                 'transmutation': 'transmutation'
             }
 
-            school = school_mapping.get(data.get('school', {}).get('name', ''), 'abjuration')
+            school = school_mapping.get(school_key, 'abjuration')
             desc = ' '.join(data.get('desc', [])) if isinstance(data.get('desc'), list) else data.get('desc', '')
 
             spell, created = Spell.objects.get_or_create(

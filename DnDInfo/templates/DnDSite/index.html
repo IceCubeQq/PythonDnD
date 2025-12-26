@@ -1,0 +1,40 @@
+{% extends "DnDSite/base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12 text-center mb-5">
+        <h1>Добро пожаловать в D&D Справочник!</h1>
+        <p class="lead">Быстрый доступ к правилам, монстрам и заклинаниям</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Монстры</h5>
+                <h2>{{ monster_count }}</h2>
+                <a href="{% url 'monster_list' %}" class="btn btn-primary">Перейти</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Заклинания</h5>
+                <h2>{{ spell_count }}</h2>
+                <a href="{% url 'spell_list' %}" class="btn btn-primary">Перейти</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Снаряжение</h5>
+                <h2>{{ equipment_count }}</h2>
+                <a href="{% url 'equipment_list' %}" class="btn btn-primary">Перейти</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

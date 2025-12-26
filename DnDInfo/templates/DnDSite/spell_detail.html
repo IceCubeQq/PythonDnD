@@ -1,0 +1,246 @@
+{% extends "DnDSite/base.html" %}
+
+{% block content %}
+<div class="container">
+    <!-- Навигация назад -->
+    <a href="{% url 'spell_list' %}" class="btn btn-outline-secondary mb-3">
+        ← Назад к списку заклинаний
+    </a>
+
+    <!-- Основная карточка заклинания -->
+    <div class="card shadow">
+        <!-- Заголовок с уровнем и школой -->
+        <div class="card-header bg-primary text-white">
+            <div class="row">
+                <div class="col">
+                    <h1 class="h2 mb-0">{{ spell.name }}</h1>
+                </div>
+                <div class="col-auto">
+                    <div class="d-flex gap-2">
+                        <!-- Уровень заклинания -->
+                        <span class="badge bg-light text-dark fs-6">
+                            {% if spell.level == 0 %}
+                                Заговор
+                            {% else %}
+                                {{ spell.level }} уровень
+                            {% endif %}
+                        </span>
+                        
+                        <!-- Школа магии -->
+                        <span class="badge bg-info fs-6">
+                            {{ spell.get_school_display }}
+                        </span>
+                        
+                        <!-- Ритуал -->
+                        {% if spell.ritual %}
+                        <span class="badge bg-warning text-dark fs-6">
+                            Ритуал
+                        </span>
+                        {% endif %}
+                        
+                        <!-- Концентрация -->
+                        {% if spell.concentration %}
+                        <span class="badge bg-danger fs-6">
+                            Концентрация
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <div class="row">
+                <!-- Основные характеристики -->
+                <div class="col-md-8">
+                    <!-- Описание -->
+                    <div class="mb-4">
+                        <h4 class="border-bottom pb-2">Описание</h4>
+                        <p class="lead">{{ spell.desc|linebreaks }}</p>
+                    </div>
+                    
+                    <!-- Подробности -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2">Характеристики</h5>
+                            <table class="table table-sm">
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">Время накладывания</th>
+                                        <td>{{ spell.casting_time }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Дальность</th>
+                                        <td>{{ spell.spell_range }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Продолжительность</th>
+                                        <td>{{ spell.duration }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Требует концентрации</th>
+                                        <td>
+                                            {% if spell.concentration %}
+                                                <span class="text-success">Да</span>
+                                            {% else %}
+                                                <span class="text-secondary">Нет</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">Можно использовать как ритуал</th>
+                                        <td>
+                                            {% if spell.ritual %}
+                                                <span class="text-success">Да</span>
+                                            {% else %}
+                                                <span class="text-secondary">Нет</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Компоненты -->
+                        <div class="col-md-6">
+                            <h5 class="border-bottom pb-2">Компоненты</h5>
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                {% for component in components %}
+                                <span class="badge 
+                                    {% if component.type == 'V' %}bg-success
+                                    {% elif component.type == 'S' %}bg-warning text-dark
+                                    {% else %}bg-secondary
+                                    {% endif %} fs-6 p-2">
+                                    {{ component.get_type_display }}
+                                </span>
+                                {% empty %}
+                                <span class="text-muted">Нет компонентов</span>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- Легенда компонентов -->
+                            <div class="small text-muted mt-3">
+                                <p><strong>Легенда компонентов:</strong></p>
+                                <ul class="list-unstyled">
+                                    <li><span class="badge bg-success">В</span> — Вербальный (речь)</li>
+                                    <li><span class="badge bg-warning text-dark">С</span> — Соматический (жесты)</li>
+                                    <li><span class="badge bg-secondary">М</span> — Материальный (фокус или компоненты)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Боковая панель с информацией -->
+                <div class="col-md-4">
+                    <div class="card border-primary">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Сводка заклинания</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong>Уровень:</strong><br>
+                                {% if spell.level == 0 %}
+                                    <span class="badge bg-light text-dark">Заговор</span>
+                                {% else %}
+                                    <span class="badge bg-dark">
+                                        {{ spell.level }}-й уровень
+                                    </span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Школа магии:</strong><br>
+                                <span class="badge bg-info">{{ spell.get_school_display }}</span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Время накладывания:</strong><br>
+                                <code>{{ spell.casting_time }}</code>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Дальность:</strong><br>
+                                <code>{{ spell.spell_range }}</code>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Длительность:</strong><br>
+                                <code>{{ spell.duration }}</code>
+                            </div>
+                            
+                            {% if spell.ritual or spell.concentration %}
+                            <div class="mb-3">
+                                <strong>Особые свойства:</strong><br>
+                                {% if spell.ritual %}
+                                    <span class="badge bg-warning text-dark me-1">Ритуал</span>
+                                {% endif %}
+                                {% if spell.concentration %}
+                                    <span class="badge bg-danger">Концентрация</span>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Правила и пояснения -->
+                    <div class="card mt-3 border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">📚 Правила D&D</h6>
+                        </div>
+                        <div class="card-body small">
+                            <p><strong>Заговоры</strong> — заклинания 0-го уровня, которые не требуют ячеек заклинаний.</p>
+                            <p><strong>Ритуалы</strong> — можно использовать без затраты ячейки, но время накладывания увеличивается на 10 минут.</p>
+                            <p><strong>Концентрация</strong> — требует поддержания концентрации всё время действия заклинания.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Футер с дополнительной информацией -->
+        <div class="card-footer bg-light">
+            <div class="row">
+                <div class="col">
+                    <small class="text-muted">
+                        ID заклинания: {{ spell.id }} | 
+                        Обновлено: {% now "SHORT_DATETIME_FORMAT" %}
+                    </small>
+                </div>
+                <div class="col-auto">
+                    <!-- Ссылка для добавления в избранное (заглушка) -->
+                    <button class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-star"></i> В избранное
+                    </button>
+                    <!-- Кнопка поделиться (заглушка) -->
+                    <button class="btn btn-sm btn-outline-primary">
+                        <i class="bi bi-share"></i> Поделиться
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Стили для улучшения внешнего вида -->
+<style>
+    .card {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .badge {
+        font-size: 0.9em;
+        padding: 0.5em 0.8em;
+    }
+    .lead {
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+    .border-bottom {
+        border-bottom: 2px solid #dee2e6 !important;
+    }
+    .table th {
+        width: 40%;
+    }
+</style>
+{% endblock %}
