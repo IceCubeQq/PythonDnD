@@ -1,0 +1,455 @@
+{% extends "DnDSite/base.html" %}
+{% load static %}
+
+{% block title %}Добавить монстра - D&D Справочник{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'monster_list' %}">Монстры</a></li>
+            <li class="breadcrumb-item active">Добавить монстра</li>
+        </ol>
+    </nav>
+
+    <!-- Заголовок -->
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5 fw-bold">
+                <i class="bi bi-plus-circle text-success"></i> Добавить нового монстра
+            </h1>
+            <p class="lead text-muted">Создайте собственного монстра для вашей кампании D&D</p>
+        </div>
+    </div>
+
+    <!-- Форма -->
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow border-0">
+                <div class="card-body p-4">
+                    <form method="post" id="monsterForm" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Сообщения об ошибках формы -->
+                        {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                            <p class="mb-0">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="row g-3">
+                            <!-- Название монстра -->
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" name="name" class="form-control" id="id_name"
+                                           placeholder="Название монстра" required>
+                                    <label for="id_name">Название</label>
+                                    {% if form.name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.name.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Размер -->
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <select name="size" class="form-select" id="id_size" required>
+                                        <option value="" selected>Выберите размер</option>
+                                        <option value="Tiny">Крошечный</option>
+                                        <option value="Small">Маленький</option>
+                                        <option value="Medium">Средний</option>
+                                        <option value="Large">Большой</option>
+                                        <option value="Huge">Огромный</option>
+                                        <option value="Gargantuan">Гигантский</option>
+                                    </select>
+                                    {% if form.size.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.size.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Тип -->
+                            <div class="col-12">
+                                <div class="form-floating mb-3">
+                                    <input type="text" name="type" class="form-control" id="id_type"
+                                           placeholder="Тип монстра" required>
+                                    <label for="id_type">Тип *</label>
+                                    <div class="form-text">Например: дракон, гуманоид, нежить, зверь и т.д.</div>
+                                    {% if form.type.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.type.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Здоровье -->
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="number" name="hit_points" class="form-control" id="id_hit_points"
+                                           placeholder="Уровни жизней" min="1" required>
+                                    <label for="id_hit_points">Уровни жизней (HP) *</label>
+                                    <div class="form-text">Количество хитов</div>
+                                    {% if form.hit_points.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.hit_points.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Характеристики -->
+                        <h4 class="mt-5 mb-3 border-bottom pb-2">
+                            Характеристики
+                        </h4>
+
+                        <div class="row g-3">
+                            <!-- Сила -->
+                            <div class="col-md-4 col-lg-2">
+                                <div class="form-floating mb-3">
+                                    <input type="number" name="strength" class="form-control stat-input"
+                                           id="id_strength" placeholder="Сила" min="1" max="30" required>
+                                    <label for="id_strength">Сила *</label>
+                                </div>
+                            </div>
+
+                            <!-- Ловкость -->
+                            <div class="col-md-4 col-lg-2">
+                                <div class="form-floating mb-3">
+                                    <input type="number" name="dexterity" class="form-control stat-input"
+                                           id="id_dexterity" placeholder="Ловкость" min="1" max="30" required>
+                                    <label for="id_dexterity">Ловкость *</label>
+                                </div>
+                            </div>
+
+                            <!-- Телосложение -->
+                            <div class="col-md-4 col-lg-2">
+                                <div class="form-floating mb-3">
+                                    <input type="number" name="constitution" class="form-control stat-input"
+                                           id="id_constitution" placeholder="Телосложение" min="1" max="30" required>
+                                    <label for="id_constitution">Телосложение *</label>
+                                </div>
+                            </div>
+
+                            <!-- Интеллект -->
+                            <div class="col-md-4 col-lg-2">
+                                <div class="form-floating mb-3">
+                                    <input type="number" name="intelligence" class="form-control stat-input"
+                                           id="id_intelligence" placeholder="Интеллект" min="1" max="30" required>
+                                    <label for="id_intelligence">Интеллект *</label>
+                                </div>
+                            </div>
+
+                            <!-- Мудрость -->
+                            <div class="col-md-4 col-lg-2">
+                                <div class="form-floating mb-3">
+                                    <input type="number" name="wisdom" class="form-control stat-input"
+                                           id="id_wisdom" placeholder="Мудрость" min="1" max="30" required>
+                                    <label for="id_wisdom">Мудрость *</label>
+                                </div>
+                            </div>
+
+                            <!-- Харизма -->
+                            <div class="col-md-4 col-lg-2">
+                                <div class="form-floating mb-3">
+                                    <input type="number" name="charisma" class="form-control stat-input"
+                                           id="id_charisma" placeholder="Харизма" min="1" max="30" required>
+                                    <label for="id_charisma">Харизма *</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Класс брони -->
+                        <h4 class="mt-5 mb-3 border-bottom pb-2">
+                            <i class="bi bi-shield"></i> Класс брони
+                        </h4>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <select name="armor-type" class="form-select" id="id_armor_type">
+                                        <option value="natural" selected>Природная броня</option>
+                                        <option value="armor">Доспехи</option>
+                                        <option value="magic">Магическая защита</option>
+                                        <option value="dex">Ловкость</option>
+                                        <option value="other">Другое</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="number" name="armor-value" class="form-control"
+                                           id="id_armor_value" placeholder="Значение брони" min="0">
+                                    <label for="id_armor_value">Значение брони</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Скорость -->
+                        <h4 class="mt-5 mb-3 border-bottom pb-2">
+                            <i class="bi bi-speedometer2"></i> Скорость
+                        </h4>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" name="speed-type" class="form-control"
+                                           id="id_speed_type" placeholder="Тип передвижения">
+                                    <label for="id_speed_type">Тип передвижения</label>
+                                    <div class="form-text">Например: walk, fly, swim</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" name="speed-value" class="form-control"
+                                           id="id_speed_value" placeholder="Значение скорости">
+                                    <label for="id_speed_value">Значение скорости</label>
+                                    <div class="form-text">Например: 30 футов, 60 футов (полет)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Кнопки отправки -->
+                        <div class="d-flex justify-content-between mt-5">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-save"></i> Сохранить монстра
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Подсказки по созданию монстра -->
+            <div class="card mt-4 border-info">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="bi bi-lightbulb"></i> Советы по созданию монстра</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h6><i class="bi bi-1-circle"></i> Баланс характеристик</h6>
+                            <p class="small">Значения характеристик от 1 до 30. Среднее значение - 10.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6><i class="bi bi-2-circle"></i> Класс брони</h6>
+                            <p class="small">AC 10-12 - слабая защита, 13-15 - средняя, 16+ - высокая.</p>
+                        </div>
+                        <div class="col-md-4">
+                            <h6><i class="bi bi-3-circle"></i> Здоровье</h6>
+                            <p class="small">Низкое: 1-30, Среднее: 31-100, Высокое: 101+ HP.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Стили для формы */
+.form-floating > .form-control,
+.form-floating > .form-select {
+    height: calc(3.5rem + 2px);
+    padding: 1rem 0.75rem;
+}
+
+.form-floating > label {
+    padding: 1rem 0.75rem;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.border-bottom {
+    border-bottom: 2px solid #dee2e6 !important;
+}
+
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* Стили для характеристик */
+.stat-input {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.stat-input:focus {
+    border-color: #6610f2;
+    box-shadow: 0 0 0 0.25rem rgba(102, 16, 242, 0.25);
+}
+
+/* Стили для модификаторов */
+.modifier-badge {
+    font-size: 0.8em;
+    padding: 0.3em 0.6em;
+    margin-left: 0.5em;
+    vertical-align: middle;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .display-5 {
+        font-size: 1.8rem;
+    }
+
+    .stat-input {
+        font-size: 1rem;
+    }
+}
+</style>
+
+<script>
+// Динамический расчет модификаторов
+document.addEventListener('DOMContentLoaded', function() {
+    const statInputs = document.querySelectorAll('.stat-input');
+
+    function calculateModifier(value) {
+        return Math.floor((value - 10) / 2);
+    }
+
+    function updateModifierDisplay(input) {
+        const value = parseInt(input.value) || 0;
+        const modifier = calculateModifier(value);
+        const label = input.parentElement.querySelector('label');
+
+        // Добавляем модификатор к метке
+        const modifierText = modifier >= 0 ? `+${modifier}` : modifier.toString();
+        const existingModifier = label.querySelector('.modifier-badge');
+
+        if (existingModifier) {
+            existingModifier.remove();
+        }
+
+        const badge = document.createElement('span');
+        badge.className = `modifier-badge badge ms-2 ${modifier >= 0 ? 'bg-success' : 'bg-danger'}`;
+        badge.textContent = modifierText;
+        label.appendChild(badge);
+    }
+
+    // Обновляем при вводе
+    statInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            updateModifierDisplay(this);
+        });
+
+        // Инициализация при загрузке
+        if (input.value) {
+            updateModifierDisplay(input);
+        }
+    });
+
+    // Валидация формы
+    const form = document.getElementById('monsterForm');
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        const errorMessages = [];
+
+        // Проверка обязательных полей
+        const requiredInputs = form.querySelectorAll('input[required], select[required]');
+        requiredInputs.forEach(input => {
+            if (!input.value.trim()) {
+                isValid = false;
+                input.classList.add('is-invalid');
+                errorMessages.push(`Поле "${input.previousElementSibling?.textContent || 'Неизвестное поле'}" обязательно для заполнения`);
+            } else {
+                input.classList.remove('is-invalid');
+            }
+        });
+
+        // Проверка числовых полей
+        const numberInputs = form.querySelectorAll('input[type="number"]');
+        numberInputs.forEach(input => {
+            if (input.value) {
+                const value = parseInt(input.value);
+                const min = parseInt(input.min) || -Infinity;
+                const max = parseInt(input.max) || Infinity;
+
+                if (value < min || value > max) {
+                    isValid = false;
+                    input.classList.add('is-invalid');
+                    errorMessages.push(`Значение в поле "${input.previousElementSibling?.textContent || 'Неизвестное поле'}" должно быть от ${min} до ${max}`);
+                }
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            alert('Пожалуйста, исправьте следующие ошибки:\n\n' + errorMessages.join('\n'));
+        }
+    });
+
+    // Подсказки при наведении на характеристики
+    statInputs.forEach(input => {
+        input.addEventListener('mouseenter', function() {
+            const value = parseInt(this.value) || 0;
+            const modifier = calculateModifier(value);
+            const tooltipText = `Модификатор: ${modifier >= 0 ? '+' : ''}${modifier}`;
+
+            // Создаем всплывающую подсказку
+            const tooltip = document.createElement('div');
+            tooltip.className = 'tooltip bs-tooltip-top';
+            tooltip.innerHTML = `
+                <div class="tooltip-arrow"></div>
+                <div class="tooltip-inner">${tooltipText}</div>
+            `;
+
+            const rect = this.getBoundingClientRect();
+            tooltip.style.position = 'fixed';
+            tooltip.style.top = (rect.top - 40) + 'px';
+            tooltip.style.left = (rect.left + rect.width/2) + 'px';
+            tooltip.style.transform = 'translateX(-50%)';
+
+            this.tooltipElement = tooltip;
+            document.body.appendChild(tooltip);
+        });
+
+        input.addEventListener('mouseleave', function() {
+            if (this.tooltipElement) {
+                this.tooltipElement.remove();
+                this.tooltipElement = null;
+            }
+        });
+    });
+
+    // Автозаполнение модификаторов при вводе характеристик
+    function autoFillStats() {
+        // Пример: если пользователь хочет быстро заполнить стандартные значения
+        const autoFillBtn = document.createElement('button');
+        autoFillBtn.type = 'button';
+        autoFillBtn.className = 'btn btn-sm btn-outline-secondary mb-3';
+        autoFillBtn.innerHTML = '<i class="bi bi-magic"></i> Заполнить стандартные значения';
+        autoFillBtn.onclick = function() {
+            document.getElementById('id_strength').value = 10;
+            document.getElementById('id_dexterity').value = 10;
+            document.getElementById('id_constitution').value = 10;
+            document.getElementById('id_intelligence').value = 10;
+            document.getElementById('id_wisdom').value = 10;
+            document.getElementById('id_charisma').value = 10;
+
+            // Обновляем отображение модификаторов
+            statInputs.forEach(input => updateModifierDisplay(input));
+        };
+
+        const statsSection = document.querySelector('.border-bottom + .row');
+        statsSection.parentNode.insertBefore(autoFillBtn, statsSection);
+    }
+
+    // Вызываем автозаполнение
+    autoFillStats();
+});
+</script>
+{% endblock %}

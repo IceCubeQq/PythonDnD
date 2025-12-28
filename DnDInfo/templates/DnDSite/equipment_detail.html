@@ -2,11 +2,28 @@
 
 {% block content %}
 <div class="container">
-    <!-- Кнопка назад -->
-    <div class="mb-4">
-        <a href="{% url 'equipment_list' %}" class="btn btn-outline-secondary">
+    <!-- Кнопки управления -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="{% url 'equipment_list' %}{% if equipment.is_homebrew %}?show_homebrew=true{% endif %}"
+           class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Назад к снаряжению
         </a>
+
+        <!-- Кнопки управления для homebrew -->
+        {% if request.user.is_authenticated %}
+            {% if request.user.is_staff or request.user == equipment.created_by %}
+            <div class="btn-group">
+                <a href="{% url 'edit_equipment' equipment.id %}" class="btn btn-outline-warning">
+                    <i class="bi bi-pencil"></i> Редактировать
+                </a>
+                {% if request.user.is_staff and equipment.is_homebrew %}
+                <a href="{% url 'delete_equipment' equipment.id %}" class="btn btn-outline-danger">
+                    <i class="bi bi-trash"></i> Удалить
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        {% endif %}
     </div>
 
     <!-- Основная информация -->
@@ -15,7 +32,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 <h1 class="h3 mb-0">{{ equipment.name }}</h1>
                 {% if equipment.cost_quantity %}
-                <span class="badge 
+                <span class="badge
                     {% if equipment.cost_unit == 'cp' %}bg-light text-dark
                     {% elif equipment.cost_unit == 'sp' %}bg-secondary
                     {% elif equipment.cost_unit == 'ep' %}bg-warning text-dark
@@ -53,6 +70,30 @@
                             {% endif %}
                         </p>
                     </div>
+
+                    <!-- Информация о homebrew -->
+                    {% if equipment.is_homebrew %}
+                    <div class="alert {% if equipment.is_approved %}alert-success{% else %}alert-warning{% endif %}">
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-stars fs-4 me-3"></i>
+                            <div>
+                                <strong>Homebrew контент</strong>
+                                <div class="small">
+                                    {% if equipment.created_by %}
+                                        Автор: {{ equipment.created_by.username }}
+                                    {% endif %}
+                                    <br>
+                                    Статус:
+                                    {% if equipment.is_approved %}
+                                        <span class="badge bg-success">Одобрено администратором</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Ожидает одобрения</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
 
                 <!-- Правая колонка - характеристики -->
@@ -93,6 +134,16 @@
                                         <td>{{ equipment.get_cost_unit_display }}</td>
                                     </tr>
                                     <tr>
+                                        <th scope="row">Тип</th>
+                                        <td>
+                                            {% if equipment.is_homebrew %}
+                                                <span class="badge bg-success">Homebrew</span>
+                                            {% else %}
+                                                <span class="badge bg-primary">Официальное</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <th scope="row">ID предмета</th>
                                         <td><code>{{ equipment.id }}</code></td>
                                     </tr>
@@ -107,10 +158,14 @@
         <!-- Футер с дополнительной информацией -->
         <div class="card-footer bg-light">
             <div class="row">
-
-                <div class="col-auto">
+                <div class="col">
                     <small class="text-muted">
-                        ID: {{ equipment.id }} | Обновлено: {% now "SHORT_DATETIME_FORMAT" %}
+                        ID: {{ equipment.id }} |
+                        {% if equipment.created_at %}
+                            Добавлено: {{ equipment.created_at|date:"d.m.Y H:i" }}
+                        {% else %}
+                            Обновлено: {% now "SHORT_DATETIME_FORMAT" %}
+                        {% endif %}
                     </small>
                 </div>
             </div>

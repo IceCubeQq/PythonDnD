@@ -64,6 +64,8 @@ class DataImporter:
                     'intelligence': data.get('intelligence', 10),
                     'wisdom': data.get('wisdom', 10),
                     'charisma': data.get('charisma', 10),
+                    'is_homebrew': False,
+                    'is_approved': True,
                 }
             )
 
@@ -130,6 +132,8 @@ class DataImporter:
                     'school': school,
                     'ritual': data.get('ritual', False),
                     'concentration': data.get('concentration', False),
+                    'is_homebrew': False,
+                    'is_approved': True,
                 }
             )
             components = data.get('components', [])
@@ -168,6 +172,8 @@ class DataImporter:
                     'weight': data.get('weight', 0),
                     'cost_quantity': cost_quantity,
                     'cost_unit': cost_unit,
+                    'is_homebrew': False,
+                    'is_approved': True,
                 }
             )
             return equipment

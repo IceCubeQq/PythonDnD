@@ -1,6 +1,22 @@
+from django.contrib.auth.models import User
 from django.db import models
+from django.urls import reverse
+
 
 class Monster(models.Model):
+    def get_similar_monsters(self, limit=5):
+        from django.db.models import Q
+        similar = Monster.objects.filter(
+            Q(type__icontains=self.type) | Q(size=self.size)
+        ).exclude(id=self.id)
+        return similar.order_by(
+            '-type',
+            'hit_points'
+        )[:limit]
+
+    def get_absolute_url(self):
+        return reverse('monster_detail', args=[str(self.id)])
+
     name = models.CharField("Название", max_length=50)
     size = models.TextField("Размер")
     type = models.TextField("Тип")
@@ -11,8 +27,24 @@ class Monster(models.Model):
     intelligence = models.IntegerField("Интеллект")
     wisdom = models.IntegerField("Мудрость")
     charisma = models.IntegerField("Харизма")
+    is_homebrew = models.BooleanField("Homebrew", default=False)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Автор")
+    created_at = models.DateTimeField("Создан", auto_now_add=True)
+    is_approved = models.BooleanField("Одобрено", default=False)
+
+    class Meta:
+        ordering = ['is_homebrew', 'name']
+        verbose_name = 'Монстр'
+        verbose_name_plural = 'Монстры'
+
+    def __str__(self):
+        prefix = "[Homebrew] " if self.is_homebrew else ""
+        return f"{prefix}{self.name}"
 
 class Spell(models.Model):
+    def get_absolute_url(self):
+        return reverse('spell_detail', args=[str(self.id)])
+
     SCHOOL_CHOICES = [
         ('abjuration', 'Ограждение'),
         ('conjuration', 'Вызов'),
@@ -33,8 +65,20 @@ class Spell(models.Model):
     school = models.CharField(max_length=20, choices=SCHOOL_CHOICES, verbose_name='Школа магии')
     ritual = models.BooleanField("Ритуал", default=False)
     concentration = models.BooleanField("Концентрация", default=False)
+    is_homebrew = models.BooleanField("Homebrew", default=False)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Автор")
+    created_at = models.DateTimeField("Создан", auto_now_add=True)
+    is_approved = models.BooleanField("Одобрено", default=False)
+
+    class Meta:
+        ordering = ['is_homebrew', 'level', 'name']
+        verbose_name = 'Заклинание'
+        verbose_name_plural = 'Заклинания'
 
 class Equipment(models.Model):
+    def get_absolute_url(self):
+        return reverse('equipment_detail', args=[str(self.id)])
+
     CURRENCY_UNITS = [
         ('cp', 'Медные'),
         ('sp', 'Серебряные'),
@@ -47,6 +91,15 @@ class Equipment(models.Model):
     weight = models.IntegerField("Вес")
     cost_quantity = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     cost_unit = models.CharField(max_length=2, choices=CURRENCY_UNITS, default='gp', blank=True)
+    is_homebrew = models.BooleanField("Homebrew", default=False)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Автор")
+    created_at = models.DateTimeField("Создан", auto_now_add=True)
+    is_approved = models.BooleanField("Одобрено", default=False)
+
+    class Meta:
+        ordering = ['is_homebrew', 'name']
+        verbose_name = 'Снаряжение'
+        verbose_name_plural = 'Снаряжение'
 
 class Armor_class(models.Model):
     ARMOR_TYPES = [
@@ -98,6 +151,3 @@ class Component(models.Model):
 
     def __str__(self):
         return self.get_type_display()
-
-
-

@@ -19,21 +19,16 @@ class Command(BaseCommand):
         )
 
     def get_spell_index_from_name(self, name):
-        """Преобразует название заклинания в формат индекса API"""
-        # Приводим к нижнему регистру
         index = name.lower()
-
-        # Заменяем специальные символы
         index = index.replace(' ', '-')
-        index = index.replace('/', '-')  # Для Antipathy/Sympathy -> antipathy-sympathy
-        index = index.replace("'", '')  # Для Mordenkainen's -> mordenkainens
-        index = index.replace('"', '')  # Для кавычек
-        index = index.replace(':', '')  # Для двоеточий
-        index = index.replace('.', '')  # Для точек
-        index = index.replace(',', '')  # Для запятых
-        index = index.replace('&', '')  # Для амперсандов
+        index = index.replace('/', '-')
+        index = index.replace("'", '')
+        index = index.replace('"', '')
+        index = index.replace(':', '')
+        index = index.replace('.', '')
+        index = index.replace(',', '')
+        index = index.replace('&', '')
 
-        # Специальные случаи
         special_cases = {
             'antipathy/sympathy': 'antipathy-sympathy',
             'mordenkainen\'s sword': 'mordenkainens-sword',
@@ -57,7 +52,6 @@ class Command(BaseCommand):
             'arzah\'s black book': 'arzahs-black-book',
         }
 
-        # Проверяем специальные случаи
         name_lower = name.lower()
         if name_lower in special_cases:
             return special_cases[name_lower]
@@ -80,10 +74,7 @@ class Command(BaseCommand):
                 processed += 1
                 self.stdout.write(f"[{processed}/{total_spells}] Обработка: {spell.name}")
 
-                # Получаем индекс заклинания
                 index = self.get_spell_index_from_name(spell.name)
-
-                # Получаем данные из API
                 url = f"{base_url}/spells/{index}"
                 response = requests.get(url, timeout=10)
 
@@ -123,12 +114,9 @@ class Command(BaseCommand):
                             self.style.ERROR(f"✗ Нет данных о школе: {spell.name}")
                         )
                 else:
-                    # Попробуем найти заклинание через список всех заклинаний
                     self.stdout.write(
                         self.style.WARNING(f"✗ Не найдено напрямую (статус {response.status_code}): {spell.name}")
                     )
-
-                    # Попробуем через поиск в списке всех заклинаний
                     try:
                         list_url = f"{base_url}/spells"
                         list_response = requests.get(list_url, timeout=10)
@@ -136,7 +124,6 @@ class Command(BaseCommand):
                         if list_response.status_code == 200:
                             all_spells = list_response.json().get('results', [])
 
-                            # Ищем похожее название
                             found_spell = None
                             for api_spell in all_spells:
                                 if api_spell['name'].lower() == spell.name.lower():
@@ -144,7 +131,6 @@ class Command(BaseCommand):
                                     break
 
                             if found_spell:
-                                # Получаем детали через правильный индекс
                                 spell_index = found_spell['index']
                                 detail_url = f"{base_url}/spells/{spell_index}"
                                 detail_response = requests.get(detail_url, timeout=10)

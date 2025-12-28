@@ -40,7 +40,7 @@ ROOT_URLCONF = 'DnDInfo.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -95,5 +95,10 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# DND_API_BASE_URL = os.getenv('DND_API_URL', 'https://www.dnd5eapi.co/api/2014')
 DND_API_URL = os.getenv('DND_API_URL', 'https://www.dnd5eapi.co/api/2014')
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+LOGOUT_REDIRECT_URL = '/'
