@@ -76,6 +76,22 @@ class Spell(models.Model):
         verbose_name_plural = 'Заклинания'
 
 class Equipment(models.Model):
+    def get_similar_equipment(self, limit=5):
+        from django.db.models import Q
+        similar = Equipment.objects.filter(
+            Q(name__icontains=self.name.split()[0]) |
+            Q(description__icontains=self.name.split()[0])
+        ).exclude(id=self.id)  # исключаем текущий предмет
+        if self.description:
+            keywords = self.description.split()[:10]
+            for keyword in keywords:
+                if len(keyword) > 3:
+                    similar = similar | Equipment.objects.filter(
+                        Q(description__icontains=keyword) |
+                        Q(name__icontains=keyword)
+                    ).exclude(id=self.id)
+        return similar.distinct()[:limit]
+
     def get_absolute_url(self):
         return reverse('equipment_detail', args=[str(self.id)])
 
@@ -88,6 +104,7 @@ class Equipment(models.Model):
     ]
 
     name = models.CharField("Название", max_length=50)
+    description = models.TextField("Описание", blank=True, null=True)
     weight = models.IntegerField("Вес")
     cost_quantity = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     cost_unit = models.CharField(max_length=2, choices=CURRENCY_UNITS, default='gp', blank=True)
@@ -100,6 +117,20 @@ class Equipment(models.Model):
         ordering = ['is_homebrew', 'name']
         verbose_name = 'Снаряжение'
         verbose_name_plural = 'Снаряжение'
+
+    def __str__(self):
+        prefix = "[Homebrew] " if self.is_homebrew else ""
+        return f"{prefix}{self.name}"
+
+    def get_cost_display(self):
+        if self.cost_quantity:
+            return f"{self.cost_quantity} {self.get_cost_unit_display()}"
+        return "Бесплатно"
+
+    def get_weight_display(self):
+        if self.weight:
+            return f"{self.weight} фунтов"
+        return "Не указан"
 
 class Armor_class(models.Model):
     ARMOR_TYPES = [

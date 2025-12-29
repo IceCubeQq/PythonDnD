@@ -51,49 +51,18 @@
             <div class="row">
                 <!-- Левая колонка - основная информация -->
                 <div class="col-md-8">
-                    <!-- Стандартное описание -->
+                    <!-- Описание -->
                     <div class="mb-4">
                         <h5 class="border-bottom pb-2">Описание</h5>
-                        <p class="lead">
-                            {% if 'меч' in equipment.name.lower or 'топор' in equipment.name.lower %}
-                                Стандартное оружие ближнего боя, используемое воинами, паладинами и рейнджерами.
-                            {% elif 'щит' in equipment.name.lower %}
-                                Защитное снаряжение, повышающее Класс Доспеха владельца.
-                            {% elif 'доспех' in equipment.name.lower %}
-                                Защитное снаряжение, предоставляющее различную степень защиты в зависимости от типа.
-                            {% elif 'лук' in equipment.name.lower or 'арбалет' in equipment.name.lower %}
-                                Оружие дальнего боя, использующее стрелы для поражения целей на расстоянии.
-                            {% elif 'посох' in equipment.name.lower or 'жезл' in equipment.name.lower %}
-                                Магический фокус, используемый заклинателями для накладывания заклинаний.
-                            {% else %}
-                                Стандартное снаряжение, доступное для приобретения в большинстве торговых городов.
-                            {% endif %}
-                        </p>
+                        {% if equipment.description %}
+                            <div class="lead">
+                                {{ equipment.description|linebreaks }}
+                            </div>
+                        {% else %}
+                        {% endif %}
                     </div>
 
-                    <!-- Информация о homebrew -->
-                    {% if equipment.is_homebrew %}
-                    <div class="alert {% if equipment.is_approved %}alert-success{% else %}alert-warning{% endif %}">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-stars fs-4 me-3"></i>
-                            <div>
-                                <strong>Homebrew контент</strong>
-                                <div class="small">
-                                    {% if equipment.created_by %}
-                                        Автор: {{ equipment.created_by.username }}
-                                    {% endif %}
-                                    <br>
-                                    Статус:
-                                    {% if equipment.is_approved %}
-                                        <span class="badge bg-success">Одобрено администратором</span>
-                                    {% else %}
-                                        <span class="badge bg-warning">Ожидает одобрения</span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endif %}
+
                 </div>
 
                 <!-- Правая колонка - характеристики -->
@@ -110,23 +79,29 @@
                                         <td>{{ equipment.name }}</td>
                                     </tr>
                                     <tr>
+                                        <th scope="row">Описание</th>
+                                        <td>
+                                            {% if equipment.description %}
+                                                <span class="text-success">
+                                                    <i class="bi bi-check-circle"></i> Есть
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">
+                                                    <i class="bi bi-x-circle"></i> Нет
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    <tr>
                                         <th scope="row">Вес</th>
                                         <td>
-                                            {% if equipment.weight %}
-                                                {{ equipment.weight }} фунтов
-                                            {% else %}
-                                                <span class="text-muted">—</span>
-                                            {% endif %}
+                                            {{ equipment.get_weight_display }}
                                         </td>
                                     </tr>
                                     <tr>
                                         <th scope="row">Стоимость</th>
                                         <td>
-                                            {% if equipment.cost_quantity %}
-                                                {{ equipment.cost_quantity|floatformat:"0" }} {{ equipment.get_cost_unit_display }}
-                                            {% else %}
-                                                Бесплатно
-                                            {% endif %}
+                                            {{ equipment.get_cost_display }}
                                         </td>
                                     </tr>
                                     <tr>
@@ -168,9 +143,65 @@
                         {% endif %}
                     </small>
                 </div>
+                {% if equipment.description %}
+                <div class="col-auto">
+                    <small class="text-muted">
+                        <i class="bi bi-text-paragraph"></i> Длина описания: {{ equipment.description|length }} символов
+                    </small>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
+
+    <!-- Похожие предметы (если есть описание для поиска) -->
+    {% if equipment.description %}
+    <div class="card mt-4 border-info">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="bi bi-search"></i> Похожие предметы</h5>
+        </div>
+        <div class="card-body">
+            <div class="row row-cols-1 row-cols-md-3 g-3">
+                {% with similar_equipment=equipment.get_similar_equipment|slice:":3" %}
+                {% if similar_equipment %}
+                    {% for item in similar_equipment %}
+                    <div class="col">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <a href="{% url 'equipment_detail' item.id %}" class="text-decoration-none">
+                                        {{ item.name }}
+                                    </a>
+                                </h6>
+                                <div class="mb-2">
+                                    <span class="badge bg-light text-dark">
+                                        {{ item.get_weight_display }}
+                                    </span>
+                                    {% if item.cost_quantity %}
+                                    <span class="badge bg-warning">
+                                        {{ item.get_cost_display }}
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                {% if item.description %}
+                                <p class="card-text small text-muted">
+                                    {{ item.description|truncatechars:100 }}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12">
+                        <p class="text-muted mb-0">Похожие предметы не найдены.</p>
+                    </div>
+                {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 <!-- Стили для улучшения отображения -->
@@ -191,4 +222,31 @@
         font-weight: 500;
     }
 </style>
+
+<script>
+// Показать/скрыть полное описание
+document.addEventListener('DOMContentLoaded', function() {
+    const descriptionElement = document.querySelector('.lead');
+    if (descriptionElement && descriptionElement.textContent.length > 500) {
+        const shortText = descriptionElement.textContent.substring(0, 500) + '...';
+        const fullText = descriptionElement.textContent;
+        const showMoreBtn = document.createElement('button');
+
+        descriptionElement.textContent = shortText;
+        showMoreBtn.className = 'btn btn-sm btn-outline-info mt-2';
+        showMoreBtn.innerHTML = '<i class="bi bi-arrows-expand"></i> Показать полностью';
+        showMoreBtn.onclick = function() {
+            if (descriptionElement.textContent === shortText) {
+                descriptionElement.textContent = fullText;
+                showMoreBtn.innerHTML = '<i class="bi bi-arrows-collapse"></i> Скрыть';
+            } else {
+                descriptionElement.textContent = shortText;
+                showMoreBtn.innerHTML = '<i class="bi bi-arrows-expand"></i> Показать полностью';
+            }
+        };
+
+        descriptionElement.parentNode.appendChild(showMoreBtn);
+    }
+});
+</script>
 {% endblock %}

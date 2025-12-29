@@ -64,12 +64,19 @@ class SpellAdmin(admin.ModelAdmin):
 
 @admin.register(Equipment)
 class EquipmentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'weight', 'cost_quantity', 'cost_unit', 'is_homebrew', 'is_approved', 'created_by',
-                    'created_at')
-    search_fields = ('name',)
+    list_display = ('name', 'description_preview', 'weight', 'cost_quantity', 'cost_unit', 'is_homebrew',
+                    'is_approved', 'created_by', 'created_at')
+    search_fields = ('name', 'description')
     list_filter = ('cost_unit', 'is_homebrew', 'is_approved')
     list_editable = ('is_approved',)
     actions = ['approve_equipment', 'reject_equipment']
+
+    def description_preview(self, obj):
+        if obj.description:
+            return obj.description[:50] + '...' if len(obj.description) > 50 else obj.description
+        return "—"
+
+    description_preview.short_description = "Описание"
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)

@@ -160,23 +160,93 @@ class DataImporter:
         data = self.api_client.get_equipment_detail(index)
         if not data:
             return None
-
         try:
             cost_data = data.get('cost', {})
             cost_quantity = cost_data.get('quantity', 0)
             cost_unit = cost_data.get('unit', 'gp')
-
+            description_parts = []
+            if 'desc' in data and data['desc']:
+                if isinstance(data['desc'], list):
+                    description_parts.extend(data['desc'])
+                else:
+                    description_parts.append(str(data['desc']))
+            if 'properties' in data and data['properties']:
+                prop_names = []
+                for prop in data.get('properties', []):
+                    if 'name' in prop:
+                        prop_names.append(prop['name'])
+                if prop_names:
+                    description_parts.append(f"Свойства: {', '.join(prop_names)}")
+            if 'equipment_category' in data:
+                category_data = data['equipment_category']
+                if 'name' in category_data:
+                    description_parts.append(f"Категория: {category_data['name']}")
+            if 'weapon_category' in data:
+                description_parts.append(f"Тип оружия: {data['weapon_category']}")
+            if 'armor_category' in data:
+                description_parts.append(f"Тип доспеха: {data['armor_category']}")
+            if 'special' in data and data['special']:
+                description_parts.append(f"Особое свойство: {data['special']}")
+            if 'damage' in data and 'damage_dice' in data['damage']:
+                damage_dice = data['damage']['damage_dice']
+                damage_type = data['damage']['damage_type']['name'] if 'damage_type' in data['damage'] else ''
+                description_parts.append(f"Урон: {damage_dice} ({damage_type})")
+            if 'range' in data and 'normal' in data['range']:
+                description_parts.append(f"Дальность: {data['range']['normal']} футов")
+            if 'armor_class' in data and 'base' in data['armor_class']:
+                description_parts.append(f"Класс брони: {data['armor_class']['base']}")
+            if 'weight' in data and data['weight']:
+                description_parts.append(f"Вес: {data['weight']} фунтов")
+            description = ' | '.join(description_parts) if description_parts else None
+            if description and len(description) > 2000:
+                description = description[:1997] + '...'
             equipment, created = Equipment.objects.get_or_create(
                 name=data['name'],
+                is_homebrew=False,
                 defaults={
+                    'description': description,
                     'weight': data.get('weight', 0),
                     'cost_quantity': cost_quantity,
                     'cost_unit': cost_unit,
-                    'is_homebrew': False,
                     'is_approved': True,
                 }
             )
+            if not created and not equipment.description and description:
+                equipment.description = description
+                equipment.save()
+                self.stdout.write(f"  ⚡ Обновлено описание для: {equipment.name}")
+
             return equipment
+
         except Exception as e:
             logger.error(f"Ошибка при импорте снаряжения {index}: {e}")
             return None
+
+    def update_equipment_descriptions(self, limit=50):
+        from .models import Equipment
+        import re
+        equipment_to_update = Equipment.objects.filter(
+            description__isnull=True,
+            is_homebrew=False
+        )[:limit]
+
+        updated_count = 0
+
+        for equipment in equipment_to_update:
+            try:
+                equipment_list = self.api_client.get_equipment_list()
+
+                for item in equipment_list:
+                    api_name = re.sub(r'[^\w\s-]', '', item['name'].lower())
+                    db_name = re.sub(r'[^\w\s-]', '', equipment.name.lower())
+
+                    if api_name == db_name:
+                        updated = self.import_equipment(item['index'])
+                        if updated:
+                            updated_count += 1
+                        break
+
+            except Exception as e:
+                logger.error(f"Ошибка при обновлении {equipment.name}: {e}")
+
+        return updated_count

@@ -178,11 +178,16 @@ class SpellForm(forms.ModelForm):
 class EquipmentForm(forms.ModelForm):
     class Meta:
         model = Equipment
-        fields = ['name', 'weight', 'cost_quantity', 'cost_unit']
+        fields = ['name', 'description', 'weight', 'cost_quantity', 'cost_unit']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Название снаряжения'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Описание предмета, его свойств и особенностей'
             }),
             'weight': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -196,6 +201,18 @@ class EquipmentForm(forms.ModelForm):
             }),
             'cost_unit': forms.Select(attrs={'class': 'form-control'}),
         }
+
+    def clean_weight(self):
+        weight = self.cleaned_data.get('weight')
+        if weight is not None and weight < 0:
+            raise ValidationError('Вес не может быть отрицательным')
+        return weight
+
+    def clean_cost_quantity(self):
+        cost_quantity = self.cleaned_data.get('cost_quantity')
+        if cost_quantity is not None and cost_quantity < 0:
+            raise ValidationError('Стоимость не может быть отрицательной')
+        return cost_quantity
 
 
 class ArmorClassForm(forms.ModelForm):
@@ -400,11 +417,16 @@ class SpellEditForm(forms.ModelForm):
 class EquipmentEditForm(forms.ModelForm):
     class Meta:
         model = Equipment
-        fields = ['name', 'weight', 'cost_quantity', 'cost_unit', 'is_approved']
+        fields = ['name', 'description', 'weight', 'cost_quantity', 'cost_unit', 'is_approved']
         widgets = {
             'name': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Название снаряжения'
+            }),
+            'description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 4,
+                'placeholder': 'Описание предмета, его свойств и особенностей...'
             }),
             'weight': forms.NumberInput(attrs={
                 'class': 'form-control',
@@ -423,7 +445,6 @@ class EquipmentEditForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-
         if user and not user.is_staff:
             self.fields.pop('is_approved')
 
