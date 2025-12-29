@@ -8,13 +8,13 @@
    Обычный пользователь - может просматривать утвержденную информацию или предлагать дополнительный контент на рассмотрение администраторам
 3. Модели данных:
     Монстр (Monster)
-    - Поля: name (Название существа), size(Размер), type(Тип), armor_class(Класс доспехов), hit_points(Уровни жизней), speed(Скорость), strength(Сила), dexterity(Ловкость), constitution(Телосложение), intelligence(Интеллект), wisdom(Мудрость), charisma(Харизма)
+    - Поля: name (Название существа), size(Размер), type(Тип), armor_class(Класс доспехов), hit_points(Уровни жизней), speed(Скорость), strength(Сила), dexterity(Ловкость), constitution(Телосложение), intelligence(Интеллект), wisdom(Мудрость), charisma(Харизма), is_homebrew(Хоумбрю ли), created_by(Кем создано), created_at(Во сколько создано), is_approved(Одобрено ли)
    
     Заклинание (Spell)
-    - Поля: name(Название заклинания), desc(Описание), range(Дальность), components(Компоненты), duration(Продолжительность), casting_time(Время накладывания), level(Уровень), school(Школа), ritual(Ритуал), concentration(Концентрация)
+    - Поля: name(Название заклинания), desc(Описание), range(Дальность), components(Компоненты), duration(Продолжительность), casting_time(Время накладывания), level(Уровень), school(Школа), ritual(Ритуал), concentration(Концентрация), is_homebrew(Хоумбрю ли), created_by(Кем создано), created_at(Во сколько создано), is_approved(Одобрено ли)
    
     Снаряжение (Equipment)
-    - Поля: name(Название снаряжения), cost_quantity(Количество валюты), cost_unit(Валюта), weight(Вес)
+    - Поля: name(Название снаряжения), description(Описание), cost_quantity(Количество валюты), cost_unit(Валюта), weight(Вес), is_homebrew(Хоумбрю ли), created_by(Кем создано), created_at(Во сколько создано), is_approved(Одобрено ли)
       
     Класс Брони (Armor_class)
     - Поля: monster(Связка с Monster), type(Тип брони), value(Значение брони)
