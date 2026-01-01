@@ -161,11 +161,21 @@ class Speed(models.Model):
     movement_type = models.CharField("Тип", max_length=20)
     value = models.CharField("Значение", max_length=20)
 
-    class Meta:
-        unique_together = ['monster', 'movement_type']
+    def get_display_name(self):
+        movement_map = {
+            'walk': 'Ходьба',
+            'fly': 'Полёт',
+            'swim': 'Плавание',
+            'climb': 'Лазание',
+            'burrow': 'Рытьё',
+            'dig': 'Копая',
+            'hover': 'Парение',
+            'other': 'Другое',
+        }
+        return movement_map.get(self.movement_type.lower(), self.movement_type.title())
 
     def __str__(self):
-        return f"{self.movement_type}: {self.value}"
+        return f"{self.get_display_name()}: {self.value}"
 
 
 class Component(models.Model):

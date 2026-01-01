@@ -1,3 +1,4 @@
+edit_spell.html:
 {% extends "DnDSite/base.html" %}
 {% load static %}
 
@@ -5,16 +6,6 @@
 
 {% block content %}
 <div class="container py-4">
-    <!-- Хлебные крошки -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'spell_list' %}">Заклинания</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'spell_detail' spell.id %}">{{ spell.name }}</a></li>
-            <li class="breadcrumb-item active">Редактирование</li>
-        </ol>
-    </nav>
-
     <!-- Заголовок -->
     <div class="row mb-4">
         <div class="col">
@@ -251,17 +242,6 @@
                                         <span class="badge bg-warning">Ожидает одобрения</span>
                                     {% endif %}
                                 </li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <h6><i class="bi bi-lightbulb"></i> Советы по редактированию</h6>
-                            <ul class="small">
-                                <li>Будьте точны в описании эффектов заклинания</li>
-                                <li>Укажите все необходимые компоненты</li>
-                                <li>Проверьте баланс уровня заклинания</li>
-                                {% if not is_admin %}
-                                <li class="text-warning">После сохранения заклинание будет отправлено на повторную модерацию</li>
-                                {% endif %}
                             </ul>
                         </div>
                     </div>

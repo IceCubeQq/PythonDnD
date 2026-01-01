@@ -8,15 +8,15 @@
     <!-- Заголовок и статистика -->
     <div class="row mb-4">
         <div class="col">
-            <h1 class="display-5 fw-bold">
+            <h1 class="display-5 fw-bold text-center">
                 <i class="bi bi-shield-check text-warning"></i> Панель модерации
             </h1>
-            <p class="lead text-muted">Управление пользовательским контентом</p>
+            <p class="lead text-muted text-center">Управление пользовательским контентом</p>
         </div>
     </div>
 
     <!-- Статистика -->
-    <div class="row mb-5">
+    <div class="row justify-content-center">
         <div class="col-md-4 mb-3">
             <div class="card border-warning shadow">
                 <div class="card-body text-center">
@@ -40,20 +40,10 @@
                 </div>
             </div>
         </div>
-
-        <div class="col-md-4 mb-3">
-            <div class="card border-danger shadow">
-                <div class="card-body text-center">
-                    <h2 class="display-4 fw-bold text-danger">{{ stats.total_rejected }}</h2>
-                    <h5 class="card-title">Отклонено</h5>
-                    <p class="text-muted mb-0">Контент не прошедший проверку</p>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Табы для навигации -->
-    <ul class="nav nav-tabs mb-4" id="moderationTabs" role="tablist">
+    <ul class="nav nav-tabs mb-4 justify-content-center" id="moderationTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="monsters-tab" data-bs-toggle="tab"
                     data-bs-target="#monsters" type="button" role="tab">
@@ -90,13 +80,10 @@
             {% if pending_monsters %}
             <div class="card shadow">
                 <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
+                    <h5 class="mb-0 text-center w-100">
                         <i class="bi bi-dragon"></i> Монстры на модерации
                         <span class="badge bg-danger ms-2">{{ pending_monsters.count }}</span>
                     </h5>
-                    <button type="button" class="btn btn-sm btn-outline-dark" id="selectAllMonsters">
-                        <i class="bi bi-check-all"></i> Выбрать все
-                    </button>
                 </div>
                 <div class="card-body">
                     <form method="post" action="{% url 'moderate_bulk' %}" id="monstersForm">
@@ -104,10 +91,10 @@
                         <input type="hidden" name="content_type" value="monster">
 
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-hover text-center align-middle">
                                 <thead>
                                     <tr>
-                                        <th width="40">
+                                        <th width="40" class="text-center">
                                             <input type="checkbox" id="checkAllMonsters">
                                         </th>
                                         <th>Название</th>
@@ -121,7 +108,7 @@
                                 <tbody>
                                     {% for monster in pending_monsters %}
                                     <tr>
-                                        <td>
+                                        <td class="text-center">
                                             <input type="checkbox" name="selected_items"
                                                    value="{{ monster.id }}" class="monster-checkbox">
                                         </td>
@@ -155,7 +142,7 @@
                                             <small>{{ monster.created_at|date:"d.m.Y H:i" }}</small>
                                         </td>
                                         <td>
-                                            <div class="btn-group btn-group-sm" role="group">
+                                            <div class="btn-group btn-group-sm justify-content-center" role="group">
                                                 <a href="{% url 'monster_detail' monster.id %}"
                                                    class="btn btn-outline-primary" target="_blank">
                                                     <i class="bi bi-eye"></i> Просмотр
@@ -177,8 +164,8 @@
                         </div>
 
                         <div class="card-footer bg-light">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
+                            <div class="d-flex justify-content-center align-items-center">
+                                <div class="me-3">
                                     <small class="text-muted">
                                         Выбрано: <span id="selectedCountMonsters">0</span> из {{ pending_monsters.count }}
                                     </small>
@@ -199,7 +186,7 @@
                 </div>
             </div>
             {% else %}
-            <div class="alert alert-success">
+            <div class="alert alert-success text-center">
                 <i class="bi bi-check-circle"></i> Все монстры проверены!
             </div>
             {% endif %}
@@ -210,13 +197,10 @@
             {% if pending_spells %}
             <div class="card shadow">
                 <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
+                    <h5 class="mb-0 text-center w-100">
                         <i class="bi bi-stars"></i> Заклинания на модерации
                         <span class="badge bg-danger ms-2">{{ pending_spells.count }}</span>
                     </h5>
-                    <button type="button" class="btn btn-sm btn-outline-dark" id="selectAllSpells">
-                        <i class="bi bi-check-all"></i> Выбрать все
-                    </button>
                 </div>
                 <div class="card-body">
                     <form method="post" action="{% url 'moderate_bulk' %}" id="spellsForm">
@@ -224,10 +208,10 @@
                         <input type="hidden" name="content_type" value="spell">
 
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-hover text-center align-middle">
                                 <thead>
                                     <tr>
-                                        <th width="40">
+                                        <th width="40" class="text-center">
                                             <input type="checkbox" id="checkAllSpells">
                                         </th>
                                         <th>Название</th>
@@ -241,7 +225,7 @@
                                 <tbody>
                                     {% for spell in pending_spells %}
                                     <tr>
-                                        <td>
+                                        <td class="text-center">
                                             <input type="checkbox" name="selected_items"
                                                    value="{{ spell.id }}" class="spell-checkbox">
                                         </td>
@@ -275,7 +259,7 @@
                                             <small>{{ spell.created_at|date:"d.m.Y H:i" }}</small>
                                         </td>
                                         <td>
-                                            <div class="btn-group btn-group-sm" role="group">
+                                            <div class="btn-group btn-group-sm justify-content-center" role="group">
                                                 <a href="{% url 'spell_detail' spell.id %}"
                                                    class="btn btn-outline-primary" target="_blank">
                                                     <i class="bi bi-eye"></i> Просмотр
@@ -297,8 +281,8 @@
                         </div>
 
                         <div class="card-footer bg-light">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
+                            <div class="d-flex justify-content-center align-items-center">
+                                <div class="me-3">
                                     <small class="text-muted">
                                         Выбрано: <span id="selectedCountSpells">0</span> из {{ pending_spells.count }}
                                     </small>
@@ -319,7 +303,7 @@
                 </div>
             </div>
             {% else %}
-            <div class="alert alert-success">
+            <div class="alert alert-success text-center">
                 <i class="bi bi-check-circle"></i> Все заклинания проверены!
             </div>
             {% endif %}
@@ -330,13 +314,10 @@
             {% if pending_equipment %}
             <div class="card shadow">
                 <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
+                    <h5 class="mb-0 text-center w-100">
                         <i class="bi bi-bag"></i> Снаряжение на модерации
                         <span class="badge bg-danger ms-2">{{ pending_equipment.count }}</span>
                     </h5>
-                    <button type="button" class="btn btn-sm btn-outline-dark" id="selectAllEquipment">
-                        <i class="bi bi-check-all"></i> Выбрать все
-                    </button>
                 </div>
                 <div class="card-body">
                     <form method="post" action="{% url 'moderate_bulk' %}" id="equipmentForm">
@@ -344,10 +325,10 @@
                         <input type="hidden" name="content_type" value="equipment">
 
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-hover text-center align-middle">
                                 <thead>
                                     <tr>
-                                        <th width="40">
+                                        <th width="40" class="text-center">
                                             <input type="checkbox" id="checkAllEquipment">
                                         </th>
                                         <th>Название</th>
@@ -361,7 +342,7 @@
                                 <tbody>
                                     {% for item in pending_equipment %}
                                     <tr>
-                                        <td>
+                                        <td class="text-center">
                                             <input type="checkbox" name="selected_items"
                                                    value="{{ item.id }}" class="equipment-checkbox">
                                         </td>
@@ -404,7 +385,7 @@
                                             <small>{{ item.created_at|date:"d.m.Y H:i" }}</small>
                                         </td>
                                         <td>
-                                            <div class="btn-group btn-group-sm" role="group">
+                                            <div class="btn-group btn-group-sm justify-content-center" role="group">
                                                 <a href="{% url 'equipment_detail' item.id %}"
                                                    class="btn btn-outline-primary" target="_blank">
                                                     <i class="bi bi-eye"></i> Просмотр
@@ -426,8 +407,8 @@
                         </div>
 
                         <div class="card-footer bg-light">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
+                            <div class="d-flex justify-content-center align-items-center">
+                                <div class="me-3">
                                     <small class="text-muted">
                                         Выбрано: <span id="selectedCountEquipment">0</span> из {{ pending_equipment.count }}
                                     </small>
@@ -448,7 +429,7 @@
                 </div>
             </div>
             {% else %}
-            <div class="alert alert-success">
+            <div class="alert alert-success text-center">
                 <i class="bi bi-check-circle"></i> Все снаряжение проверено!
             </div>
             {% endif %}
@@ -456,11 +437,11 @@
 
         <!-- Таб недавно одобренных -->
         <div class="tab-pane fade" id="approved" role="tabpanel">
-            <div class="row">
+            <div class="row justify-content-center">
                 <!-- Недавно одобренные монстры -->
                 <div class="col-md-4 mb-4">
                     <div class="card h-100">
-                        <div class="card-header bg-success text-white">
+                        <div class="card-header bg-success text-white text-center">
                             <h6 class="mb-0">
                                 <i class="bi bi-dragon"></i> Монстры
                                 <span class="badge bg-light text-dark float-end">{{ recently_approved.monsters|length }}</span>
@@ -470,8 +451,8 @@
                             {% if recently_approved.monsters %}
                             <div class="list-group list-group-flush">
                                 {% for monster in recently_approved.monsters %}
-                                <div class="list-group-item">
-                                    <div class="d-flex justify-content-between align-items-center">
+                                <div class="list-group-item text-center">
+                                    <div class="d-flex flex-column justify-content-between align-items-center">
                                         <div>
                                             <strong>{{ monster.name }}</strong>
                                             <div class="small text-muted">
@@ -479,8 +460,8 @@
                                             </div>
                                         </div>
                                         <a href="{% url 'monster_detail' monster.id %}"
-                                           class="btn btn-sm btn-outline-primary">
-                                            <i class="bi bi-eye"></i>
+                                           class="btn btn-sm btn-outline-primary mt-2">
+                                            <i class="bi bi-eye"></i> Просмотр
                                         </a>
                                     </div>
                                 </div>
@@ -496,7 +477,7 @@
                 <!-- Недавно одобренные заклинания -->
                 <div class="col-md-4 mb-4">
                     <div class="card h-100">
-                        <div class="card-header bg-success text-white">
+                        <div class="card-header bg-success text-white text-center">
                             <h6 class="mb-0">
                                 <i class="bi bi-stars"></i> Заклинания
                                 <span class="badge bg-light text-dark float-end">{{ recently_approved.spells|length }}</span>
@@ -506,8 +487,8 @@
                             {% if recently_approved.spells %}
                             <div class="list-group list-group-flush">
                                 {% for spell in recently_approved.spells %}
-                                <div class="list-group-item">
-                                    <div class="d-flex justify-content-between align-items-center">
+                                <div class="list-group-item text-center">
+                                    <div class="d-flex flex-column justify-content-between align-items-center">
                                         <div>
                                             <strong>{{ spell.name }}</strong>
                                             <div class="small text-muted">
@@ -516,8 +497,8 @@
                                             </div>
                                         </div>
                                         <a href="{% url 'spell_detail' spell.id %}"
-                                           class="btn btn-sm btn-outline-primary">
-                                            <i class="bi bi-eye"></i>
+                                           class="btn btn-sm btn-outline-primary mt-2">
+                                            <i class="bi bi-eye"></i> Просмотр
                                         </a>
                                     </div>
                                 </div>
@@ -533,7 +514,7 @@
                 <!-- Недавно одобренное снаряжение -->
                 <div class="col-md-4 mb-4">
                     <div class="card h-100">
-                        <div class="card-header bg-success text-white">
+                        <div class="card-header bg-success text-white text-center">
                             <h6 class="mb-0">
                                 <i class="bi bi-bag"></i> Снаряжение
                                 <span class="badge bg-light text-dark float-end">{{ recently_approved.equipment|length }}</span>
@@ -543,8 +524,8 @@
                             {% if recently_approved.equipment %}
                             <div class="list-group list-group-flush">
                                 {% for item in recently_approved.equipment %}
-                                <div class="list-group-item">
-                                    <div class="d-flex justify-content-between align-items-center">
+                                <div class="list-group-item text-center">
+                                    <div class="d-flex flex-column justify-content-between align-items-center">
                                         <div>
                                             <strong>{{ item.name }}</strong>
                                             <div class="small text-muted">
@@ -554,8 +535,8 @@
                                             </div>
                                         </div>
                                         <a href="{% url 'equipment_detail' item.id %}"
-                                           class="btn btn-sm btn-outline-primary">
-                                            <i class="bi bi-eye"></i>
+                                           class="btn btn-sm btn-outline-primary mt-2">
+                                            <i class="bi bi-eye"></i> Просмотр
                                         </a>
                                     </div>
                                 </div>
@@ -587,15 +568,23 @@
 .table th {
     background-color: #f8f9fa;
     font-weight: 600;
+    text-align: center !important;
 }
 
 .table td {
     vertical-align: middle;
+    text-align: center !important;
 }
 
 .btn-group-sm > .btn {
     padding: 0.25rem 0.5rem;
     font-size: 0.875rem;
+}
+
+/* Центрирование элементов таблицы */
+.table.text-center th,
+.table.text-center td {
+    text-align: center;
 }
 
 /* Анимации */
@@ -619,6 +608,20 @@ input[type="checkbox"] {
     font-size: 2.5rem;
 }
 
+/* Центрирование всех элементов */
+.text-center {
+    text-align: center !important;
+}
+
+.justify-content-center {
+    justify-content: center !important;
+}
+
+.align-items-center {
+    align-items: center !important;
+}
+
+/* Адаптивность */
 @media (max-width: 768px) {
     .card .display-4 {
         font-size: 2rem;
@@ -636,6 +639,15 @@ input[type="checkbox"] {
     .table-responsive {
         font-size: 0.85rem;
     }
+
+    .nav-tabs {
+        flex-wrap: wrap;
+    }
+
+    .nav-item {
+        flex: 1 0 auto;
+        text-align: center;
+    }
 }
 
 /* Стили для списков */
@@ -651,6 +663,31 @@ input[type="checkbox"] {
 
 .list-group-item:last-child {
     border-bottom: none;
+}
+
+/* Стили для выравнивания в таблицах */
+.align-middle {
+    vertical-align: middle !important;
+}
+
+/* Центрирование заголовков карточек */
+.card-header h5, .card-header h6 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Центрирование кнопок действий */
+.btn-group.justify-content-center {
+    display: flex;
+    justify-content: center;
+}
+
+/* Центрирование футера таблиц */
+.card-footer .d-flex.justify-content-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 </style>
 
@@ -1021,6 +1058,15 @@ document.addEventListener('DOMContentLoaded', function() {
 /* Стили для строк при удалении */
 tr {
     transition: opacity 0.5s ease;
+}
+
+/* Дополнительные стили для центрирования */
+.w-100 {
+    width: 100% !important;
+}
+
+.d-flex.flex-column {
+    flex-direction: column !important;
 }
 </style>
 

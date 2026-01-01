@@ -5,16 +5,6 @@
 
 {% block content %}
 <div class="container py-4">
-    <!-- Хлебные крошки -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'equipment_list' %}">Снаряжение</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'equipment_detail' equipment.id %}">{{ equipment.name }}</a></li>
-            <li class="breadcrumb-item active">Редактирование</li>
-        </ol>
-    </nav>
-
     <!-- Заголовок -->
     <div class="row mb-4">
         <div class="col">
@@ -22,18 +12,6 @@
                 <i class="bi bi-pencil text-warning"></i> Редактирование снаряжения
             </h1>
             <p class="lead text-muted">Измените характеристики "{{ equipment.name }}"</p>
-
-            {% if equipment.is_homebrew and not equipment.is_approved %}
-            <div class="alert alert-warning">
-                <i class="bi bi-exclamation-triangle"></i> Это снаряжение ожидает одобрения администратора.
-            </div>
-            {% endif %}
-
-            {% if equipment.is_homebrew and not is_admin %}
-            <div class="alert alert-info">
-                <i class="bi bi-info-circle"></i> После сохранения изменений снаряжение будет отправлено на повторное рассмотрение администратором.
-            </div>
-            {% endif %}
         </div>
     </div>
 
@@ -42,7 +20,7 @@
         <div class="col-lg-8">
             <div class="card shadow border-0">
                 <div class="card-header bg-primary text-white py-3">
-                    <h3 class="mb-0"><i class="bi bi-bag"></i> Основная информация</h3>
+                    <h3 class="mb-0">Основная информация</h3>
                 </div>
 
                 <div class="card-body p-4">
@@ -81,7 +59,7 @@
                                 <div class="form-floating mb-3">
                                     {{ form.weight }}
                                     <label for="id_weight">{{ form.weight.label }}</label>
-                                    <div class="form-text">Вес в фунтах (необязательно)</div>
+                                    <div class="form-text">Вес в фунтах</div>
                                     {% if form.weight.errors %}
                                     <div class="invalid-feedback d-block">
                                         {{ form.weight.errors }}
@@ -95,7 +73,7 @@
                                 <div class="form-floating mb-3">
                                     {{ form.cost_quantity }}
                                     <label for="id_cost_quantity">Стоимость</label>
-                                    <div class="form-text">Количество монет (необязательно)</div>
+                                    <div class="form-text">Количество монет</div>
                                     {% if form.cost_quantity.errors %}
                                     <div class="invalid-feedback d-block">
                                         {{ form.cost_quantity.errors }}
@@ -175,17 +153,6 @@
                                 </li>
                             </ul>
                         </div>
-                        <div class="col-md-6">
-                            <h6><i class="bi bi-lightbulb"></i> Советы по редактированию</h6>
-                            <ul class="small">
-                                <li>Укажите реалистичный вес для предмета</li>
-                                <li>Используйте соответствующую валюту для стоимости</li>
-                                <li>Следите за балансом стоимости и полезности</li>
-                                {% if not is_admin %}
-                                <li class="text-warning">После сохранения снаряжение будет отправлено на повторную модерацию</li>
-                                {% endif %}
-                            </ul>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -202,7 +169,6 @@
                                 <tr>
                                     <th>Валюта</th>
                                     <th>Сокращение</th>
-                                    <th>Название</th>
                                     <th>Курс обмена</th>
                                     <th>Примерная стоимость</th>
                                 </tr>
@@ -211,35 +177,30 @@
                                 <tr>
                                     <td><span class="badge bg-light text-dark">cp</span></td>
                                     <td>Медные</td>
-                                    <td>Copper Pieces</td>
                                     <td>100 cp = 1 gp</td>
                                     <td>Простая еда, факел</td>
                                 </tr>
                                 <tr>
                                     <td><span class="badge bg-secondary">sp</span></td>
                                     <td>Серебряные</td>
-                                    <td>Silver Pieces</td>
                                     <td>10 sp = 1 gp</td>
                                     <td>Ночь в таверне, простая одежда</td>
                                 </tr>
                                 <tr>
                                     <td><span class="badge bg-warning text-dark">ep</span></td>
                                     <td>Электрумовые</td>
-                                    <td>Electrum Pieces</td>
                                     <td>2 ep = 1 gp</td>
                                     <td>Редко используется</td>
                                 </tr>
                                 <tr>
                                     <td><span class="badge bg-warning">gp</span></td>
                                     <td>Золотые</td>
-                                    <td>Gold Pieces</td>
                                     <td>1 gp</td>
                                     <td>Оружие, зелья, магические предметы</td>
                                 </tr>
                                 <tr>
                                     <td><span class="badge bg-info">pp</span></td>
                                     <td>Платиновые</td>
-                                    <td>Platinum Pieces</td>
                                     <td>1 pp = 10 gp</td>
                                     <td>Дорогие магические предметы, сокровища</td>
                                 </tr>
@@ -407,11 +368,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const tooltip = document.createElement('div');
                 tooltip.id = 'costTooltip';
                 tooltip.className = 'alert alert-light border mt-3 small';
-                tooltip.innerHTML = `
-                    <strong><i class="bi bi-calculator"></i> Конвертер стоимости:</strong>
-                    <div class="mt-2">${previewText.replace(/\n/g, '<br>')}</div>
-                `;
-                costQuantityInput.parentNode.parentNode.appendChild(tooltip);
             }
         }
     }

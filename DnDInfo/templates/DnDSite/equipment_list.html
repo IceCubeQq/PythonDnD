@@ -2,8 +2,7 @@
 
 {% block content %}
 <div class="container">
-    <h1 class="mb-4">
-        <i class="bi bi-bag-fill"></i> Снаряжение
+    <h1 class="mb-4">Снаряжение
         <span class="badge bg-secondary">{{ page_obj.paginator.count }}</span>
     </h1>
 
@@ -124,12 +123,12 @@
         <ul class="pagination justify-content-center">
             {% if page_obj.has_previous %}
             <li class="page-item">
-                <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}{% if selected_cost_unit %}&cost_unit={{ selected_cost_unit }}{% endif %}{% if selected_weight_filter %}&weight_filter={{ selected_weight_filter }}{% endif %}">
+                <a class="page-link" href="?page=1{% if show_homebrew %}&show_homebrew=true{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_cost_unit %}&cost_unit={{ selected_cost_unit }}{% endif %}{% if selected_weight_filter %}&weight_filter={{ selected_weight_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
                     <i class="bi bi-chevron-double-left"></i>
                 </a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}{% if selected_cost_unit %}&cost_unit={{ selected_cost_unit }}{% endif %}{% if selected_weight_filter %}&weight_filter={{ selected_weight_filter }}{% endif %}">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if show_homebrew %}&show_homebrew=true{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_cost_unit %}&cost_unit={{ selected_cost_unit }}{% endif %}{% if selected_weight_filter %}&weight_filter={{ selected_weight_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
                     <i class="bi bi-chevron-left"></i> Назад
                 </a>
             </li>
@@ -143,12 +142,12 @@
 
             {% if page_obj.has_next %}
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}{% if selected_cost_unit %}&cost_unit={{ selected_cost_unit }}{% endif %}{% if selected_weight_filter %}&weight_filter={{ selected_weight_filter }}{% endif %}">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if show_homebrew %}&show_homebrew=true{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_cost_unit %}&cost_unit={{ selected_cost_unit }}{% endif %}{% if selected_weight_filter %}&weight_filter={{ selected_weight_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
                     Вперед <i class="bi bi-chevron-right"></i>
                 </a>
             </li>
             <li class="page-item">
-                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}{% if selected_cost_unit %}&cost_unit={{ selected_cost_unit }}{% endif %}{% if selected_weight_filter %}&weight_filter={{ selected_weight_filter }}{% endif %}">
+                <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if show_homebrew %}&show_homebrew=true{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_cost_unit %}&cost_unit={{ selected_cost_unit }}{% endif %}{% if selected_weight_filter %}&weight_filter={{ selected_weight_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">
                     <i class="bi bi-chevron-double-right"></i>
                 </a>
             </li>

@@ -28,7 +28,7 @@
     <!-- Заголовок с информацией о homebrew -->
     <div class="text-center mb-4">
         {% if monster.is_homebrew %}
-        <div class="alert alert-success d-inline-flex align-items-center mb-3">
+        <div class="d-inline-flex align-items-center mb-3">
             <i class="bi bi-stars me-2 fs-5"></i>
             <div class="text-start">
                 <strong class="d-block">Homebrew контент</strong>
@@ -44,9 +44,7 @@
 
         <h1 class="display-5 fw-bold">{{ monster.name }}</h1>
         <div class="d-flex justify-content-center gap-3 mt-3">
-            <span class="badge bg-primary fs-6">
-                <i class="bi bi-rulers"></i> {{ monster.size }}
-            </span>
+
             <span class="badge bg-success fs-6">
                 <i class="bi bi-tags"></i> {{ monster.type }}
             </span>
@@ -63,9 +61,7 @@
             <div class="col-lg-8">
                 <div class="p-4">
                     <!-- Характеристики с модификаторами -->
-                    <h3 class="border-bottom pb-2 mb-4">
-                        <i class="bi bi-graph-up"></i> Характеристики
-                    </h3>
+                    <h3 class="border-bottom pb-2 mb-4">Характеристики</h3>
 
                     <div class="row row-cols-2 row-cols-md-3 g-4">
                         {% with monster as m %}
@@ -203,9 +199,6 @@
                             {% endfor %}
                         </div>
                         {% else %}
-                        <div class="alert alert-info">
-                            <i class="bi bi-info-circle"></i> Нет информации о классах брони
-                        </div>
                         {% endif %}
                     </div>
                 </div>
@@ -225,12 +218,7 @@
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <div>
                                     <strong>
-                                        {% if speed.movement_type == 'walk' %}Ходьба
-                                        {% elif speed.movement_type == 'fly' %}Полёт
-                                        {% elif speed.movement_type == 'swim' %}Плавание
-                                        {% elif speed.movement_type == 'climb' %}Лазание
-                                        {% elif speed.movement_type == 'burrow' %}Рытьё
-                                        {% else %}{{ speed.movement_type|capfirst }}{% endif %}
+                                        {{ speed.get_display_name }}
                                     </strong>
                                 </div>
                                 <span class="badge bg-success rounded-pill fs-6">{{ speed.value }}</span>
@@ -238,9 +226,7 @@
                             {% endfor %}
                         </div>
                         {% else %}
-                        <div class="alert alert-warning">
-                            <i class="bi bi-exclamation-triangle"></i> Нет информации о скорости
-                        </div>
+                        <p class="text-muted">Скорость не указана</p>
                         {% endif %}
                     </div>
 
@@ -252,13 +238,13 @@
                         <table class="table table-bordered">
                             <tbody>
                                 <tr>
-                                    <th scope="row"><i class="bi bi-heart"></i> Здоровье</th>
+                                    <th scope="row">Здоровье</th>
                                     <td class="text-end">
                                         <strong>{{ monster.hit_points }}</strong> HP
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th scope="row"><i class="bi bi-rulers"></i> Размер</th>
+                                    <th scope="row"> Размер</th>
                                     <td class="text-end">
                                         {% if monster.size == 'Tiny' %}Крошечный
                                         {% elif monster.size == 'Small' %}Маленький
@@ -270,12 +256,12 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th scope="row"><i class="bi bi-tags"></i> Тип</th>
+                                    <th scope="row">Тип</th>
                                     <td class="text-end">{{ monster.type }}</td>
                                 </tr>
                                 {% if monster.created_at %}
                                 <tr>
-                                    <th scope="row"><i class="bi bi-calendar"></i> Добавлен</th>
+                                    <th scope="row">Добавлен</th>
                                     <td class="text-end">{{ monster.created_at|date:"d.m.Y H:i" }}</td>
                                 </tr>
                                 {% endif %}
@@ -436,11 +422,6 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <div class="col-12">
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> Нет похожих монстров для отображения
-                    </div>
-                </div>
             {% endif %}
             {% endwith %}
         </div>
@@ -540,10 +521,6 @@ ${monsterName}
 {% for speed in speeds %}{{ speed.movement_type }}: {{ speed.value }}
 {% endfor %}
         `.trim();
-
-        navigator.clipboard.writeText(monsterStats).then(() => {
-            alert('Информация о монстре скопирована в буфер обмена!');
-        });
     };
 
     // Добавляем кнопку копирования, если нужно

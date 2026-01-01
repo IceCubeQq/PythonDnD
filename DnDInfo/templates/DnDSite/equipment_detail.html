@@ -79,20 +79,6 @@
                                         <td>{{ equipment.name }}</td>
                                     </tr>
                                     <tr>
-                                        <th scope="row">Описание</th>
-                                        <td>
-                                            {% if equipment.description %}
-                                                <span class="text-success">
-                                                    <i class="bi bi-check-circle"></i> Есть
-                                                </span>
-                                            {% else %}
-                                                <span class="text-muted">
-                                                    <i class="bi bi-x-circle"></i> Нет
-                                                </span>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    <tr>
                                         <th scope="row">Вес</th>
                                         <td>
                                             {{ equipment.get_weight_display }}
@@ -103,10 +89,6 @@
                                         <td>
                                             {{ equipment.get_cost_display }}
                                         </td>
-                                    </tr>
-                                    <tr>
-                                        <th scope="row">Валюта</th>
-                                        <td>{{ equipment.get_cost_unit_display }}</td>
                                     </tr>
                                     <tr>
                                         <th scope="row">Тип</th>

@@ -40,6 +40,16 @@ class CustomAuthenticationForm(AuthenticationForm):
         })
 
 class MonsterForm(forms.ModelForm):
+    speeds_input = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 4,
+            'placeholder': 'walk: 30\nfly: 30\nswim: 20\nclimb: 30'
+        }),
+        required=False,
+        label='Скорости'
+    )
+
     class Meta:
         model = Monster
         fields = [
@@ -239,13 +249,10 @@ class SpeedForm(forms.ModelForm):
         model = Speed
         fields = ['movement_type', 'value']
         widgets = {
-            'movement_type': forms.TextInput(attrs={
-                'class': 'form-control',
-                'placeholder': 'Тип (walk, fly, swim)'
-            }),
+            'movement_type': forms.Select(attrs={'class': 'form-control'}),
             'value': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Значение (30 футов)'
+                'placeholder': 'Значение (например: 30 футов)'
             }),
         }
 
@@ -267,6 +274,16 @@ class ComponentForm(forms.ModelForm):
 
 
 class MonsterEditForm(forms.ModelForm):
+    speeds_input = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 4,
+            'placeholder': 'walk: 30\nfly: 30\nswim: 20\nclimb: 30'
+        }),
+        required=False,
+        label='Скорости'
+    )
+
     class Meta:
         model = Monster
         fields = [
@@ -459,3 +476,58 @@ class EquipmentEditForm(forms.ModelForm):
         if cost_quantity is not None and cost_quantity < 0:
             raise ValidationError('Стоимость не может быть отрицательной')
         return cost_quantity
+
+class MultipleSpeedForm(forms.Form):
+    speeds = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 4,
+            'placeholder': 'walk: 30\nfly: 30\nswim: 20\nclimb: 30'
+        }),
+        required=False,
+        label='Скорости',
+        help_text='Введите каждую скорость с новой строки в формате: "тип: значение"'
+    )
+
+
+class MonsterSpeedsForm(forms.Form):
+    speeds = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 4,
+            'placeholder': 'walk: 30\nfly: 30\nswim: 20\ndig: 10'
+        }),
+        required=False,
+        label='Скорости',
+        help_text='Введите каждую скорость с новой строки в формате: "тип: значение".<br>'
+                  'Доступные типы: walk (ходьба), fly (полёт), swim (плавание), '
+                  'climb (лазание), burrow (рытьё), dig (капая), hover (парение)'
+    )
+
+    def clean_speeds(self):
+        speeds_text = self.cleaned_data.get('speeds', '')
+        valid_types = ['walk', 'fly', 'swim', 'climb', 'burrow', 'dig', 'hover', 'other']
+
+        if speeds_text:
+            speeds_list = []
+            for i, line in enumerate(speeds_text.split('\n')):
+                line = line.strip()
+                if line:
+                    if ':' not in line:
+                        raise ValidationError(
+                            f'Строка {i + 1}: "{line}" - неверный формат. Используйте "тип: значение"')
+
+                    movement_type, value = line.split(':', 1)
+                    movement_type = movement_type.strip().lower()
+                    value = value.strip()
+
+                    if movement_type not in valid_types:
+                        raise ValidationError(
+                            f'Строка {i + 1}: тип "{movement_type}" не поддерживается. '
+                            f'Доступные типы: {", ".join(valid_types)}'
+                        )
+
+                    speeds_list.append((movement_type, value))
+
+            return speeds_list
+        return []

@@ -5,16 +5,6 @@
 
 {% block content %}
 <div class="container py-4">
-    <!-- Хлебные крошки -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'monster_list' %}">Монстры</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'monster_detail' monster.id %}">{{ monster.name }}</a></li>
-            <li class="breadcrumb-item active">Редактирование</li>
-        </ol>
-    </nav>
-
     <!-- Заголовок -->
     <div class="row mb-4">
         <div class="col">
@@ -105,9 +95,7 @@
                             </div>
 
                         <!-- Характеристики -->
-                        <h4 class="mt-5 mb-3 border-bottom pb-2">
-                            <i class="bi bi-graph-up"></i> Характеристики
-                        </h4>
+                        <h4 class="mt-5 mb-3 border-bottom pb-2">Характеристики</h4>
 
                         <div class="row g-3">
                             <!-- Сила -->
@@ -176,7 +164,7 @@
                                 <div class="form-floating mb-3">
                                     {{ armor_form.value }}
                                     <label for="{{ armor_form.value.id_for_label }}">{{ armor_form.value.label }}</label>
-                                    <div class="form-text">Значение брони (например, 15). Оставьте пустым, чтобы удалить.</div>
+                                    <div class="form-text">Значение брони</div>
                                 </div>
                             </div>
                         </div>
@@ -187,18 +175,21 @@
                         </h4>
 
                         <div class="row g-3">
-                            <div class="col-md-6">
+                            <div class="col-12">
                                 <div class="form-floating mb-3">
-                                    {{ speed_form.movement_type }}
-                                    <label for="{{ speed_form.movement_type.id_for_label }}">{{ speed_form.movement_type.label }}</label>
-                                    <div class="form-text">Например: walk, fly, swim, climb, burrow</div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating mb-3">
-                                    {{ speed_form.value }}
-                                    <label for="{{ speed_form.value.id_for_label }}">{{ speed_form.value.label }}</label>
-                                    <div class="form-text">Значение скорости (например: 30 футов). Оставьте пустым, чтобы удалить.</div>
+                                    {{ speeds_form.speeds }}
+                                    <label for="{{ speeds_form.speeds.id_for_label }}">{{ speeds_form.speeds.label }}</label>
+                                    <div class="form-text">
+                                        {{ speeds_form.speeds.help_text|safe }}
+                                        Примеры:<br>
+                                        <code>walk: 30</code> - Ходьба: 30 футов<br>
+                                        <code>fly: 30</code> - Полёт: 30 футов<br>
+                                        <code>swim: 20</code> - Плавание: 20 футов<br>
+                                        <code>climb: 30</code> - Лазание: 30 футов<br>
+                                        <code>burrow: 10</code> - Рытьё: 10 футов<br>
+                                        <code>dig: 10</code> - Капая: 10 футов<br>
+                                        <code>hover: 0</code> - Парение (не требует перемещения)
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -258,17 +249,6 @@
                                         <span class="badge bg-warning">Ожидает одобрения</span>
                                     {% endif %}
                                 </li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <h6><i class="bi bi-lightbulb"></i> Советы по редактированию</h6>
-                            <ul class="small">
-                                <li>Балансируйте характеристики монстра в соответствии с его уровнем угрозы</li>
-                                <li>Укажите правильный размер и тип монстра</li>
-                                <li>Проверьте баланс здоровья и класса брони</li>
-                                {% if not is_admin %}
-                                <li class="text-warning">После сохранения монстр будет отправлен на повторную модерацию</li>
-                                {% endif %}
                             </ul>
                         </div>
                     </div>
@@ -488,50 +468,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     {% endif %}
-
-    // Предварительный просмотр характеристик
-    function setupPreview() {
-        const previewBtn = document.createElement('button');
-        previewBtn.type = 'button';
-        previewBtn.className = 'btn btn-outline-info mb-3';
-        previewBtn.innerHTML = '<i class="bi bi-eye"></i> Предпросмотр характеристик';
-        previewBtn.onclick = function() {
-            let previewText = 'Предпросмотр характеристик:\n\n';
-
-            // Основные параметры
-            const name = document.getElementById('id_name').value || 'Без названия';
-            const size = document.getElementById('id_size').value || 'Не указан';
-            const type = document.getElementById('id_type').value || 'Не указан';
-            const hp = document.getElementById('id_hit_points').value || '0';
-
-            previewText += `${name}\n`;
-            previewText += `Размер: ${size}\n`;
-            previewText += `Тип: ${type}\n`;
-            previewText += `Здоровье: ${hp} HP\n\n`;
-
-            // Характеристики
-            const statIds = ['id_strength', 'id_dexterity', 'id_constitution', 'id_intelligence', 'id_wisdom', 'id_charisma'];
-            const statLabels = ['Сила', 'Ловкость', 'Телосложение', 'Интеллект', 'Мудрость', 'Харизма'];
-
-            previewText += 'Характеристики:\n';
-            statIds.forEach((statId, index) => {
-                const input = document.getElementById(statId);
-                if (input) {
-                    const value = input.value || '0';
-                    const modifier = calculateModifier(parseInt(value) || 0);
-                    const modText = modifier >= 0 ? `+${modifier}` : modifier.toString();
-                    previewText += `  ${statLabels[index]}: ${value} (${modText})\n`;
-                }
-            });
-
-            alert(previewText);
-        };
-
-        const formContainer = document.querySelector('.card-body');
-        formContainer.insertBefore(previewBtn, formContainer.firstChild);
-    }
-
-    setupPreview();
 });
 </script>
 {% endblock %}

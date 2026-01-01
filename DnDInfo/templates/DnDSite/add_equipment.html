@@ -5,14 +5,6 @@
 
 {% block content %}
 <div class="container py-4">
-    <!-- Хлебные крошки -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'index' %}">Главная</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'equipment_list' %}">Снаряжение</a></li>
-            <li class="breadcrumb-item active">Добавить снаряжение</li>
-        </ol>
-    </nav>
 
     <!-- Заголовок -->
     <div class="row mb-4">
@@ -53,7 +45,7 @@
                                 <div class="form-floating mb-3">
                                     {{ form.weight }}
                                     <label for="{{ form.weight.id_for_label }}">{{ form.weight.label }}</label>
-                                    <div class="form-text">Вес в фунтах (необязательно)</div>
+                                    <div class="form-text">Вес в фунтах</div>
                                 </div>
                             </div>
 
@@ -62,7 +54,7 @@
                                 <div class="form-floating mb-3">
                                     {{ form.cost_quantity }}
                                     <label for="{{ form.cost_quantity.id_for_label }}">Стоимость</label>
-                                    <div class="form-text">Количество монет (необязательно)</div>
+                                    <div class="form-text">Количество монет</div>
                                 </div>
                             </div>
 
@@ -99,7 +91,6 @@
                                 <tr>
                                     <th>Валюта</th>
                                     <th>Сокращение</th>
-                                    <th>Название</th>
                                     <th>Курс обмена</th>
                                 </tr>
                             </thead>
@@ -107,31 +98,26 @@
                                 <tr>
                                     <td><span class="badge bg-light text-dark">cp</span></td>
                                     <td>Медные</td>
-                                    <td>Copper Pieces</td>
                                     <td>100 cp = 1 gp</td>
                                 </tr>
                                 <tr>
                                     <td><span class="badge bg-secondary">sp</span></td>
                                     <td>Серебряные</td>
-                                    <td>Silver Pieces</td>
                                     <td>10 sp = 1 gp</td>
                                 </tr>
                                 <tr>
                                     <td><span class="badge bg-warning text-dark">ep</span></td>
                                     <td>Электрумовые</td>
-                                    <td>Electrum Pieces</td>
                                     <td>2 ep = 1 gp</td>
                                 </tr>
                                 <tr>
                                     <td><span class="badge bg-warning">gp</span></td>
                                     <td>Золотые</td>
-                                    <td>Gold Pieces</td>
                                     <td>1 gp</td>
                                 </tr>
                                 <tr>
                                     <td><span class="badge bg-info">pp</span></td>
                                     <td>Платиновые</td>
-                                    <td>Platinum Pieces</td>
                                     <td>1 pp = 10 gp</td>
                                 </tr>
                             </tbody>

@@ -9,7 +9,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q, Count, Avg
 from .models import Monster, Spell, Equipment, Armor_class, Speed, Component
 from .forms import MonsterForm, SpellForm, EquipmentForm, ArmorClassForm, SpeedForm, ComponentForm, MonsterEditForm, \
-    SpellEditForm, EquipmentEditForm, CustomUserCreationForm, CustomAuthenticationForm
+    SpellEditForm, EquipmentEditForm, CustomUserCreationForm, CustomAuthenticationForm, MonsterSpeedsForm
 
 
 def is_admin(user):
@@ -89,7 +89,7 @@ def monster_list(request):
     else:
         monsters_list = monsters_list.order_by('name')
 
-    paginator = Paginator(monsters_list, 10)
+    paginator = Paginator(monsters_list, 12)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
@@ -260,9 +260,9 @@ def add_monster(request):
     if request.method == 'POST':
         form = MonsterForm(request.POST)
         armor_form = ArmorClassForm(request.POST, prefix='armor')
-        speed_form = SpeedForm(request.POST, prefix='speed')
+        speeds_form = MonsterSpeedsForm(request.POST)
 
-        if form.is_valid():
+        if form.is_valid() and armor_form.is_valid() and speeds_form.is_valid():
             with transaction.atomic():
                 monster = form.save(commit=False)
                 monster.is_homebrew = True
@@ -270,27 +270,29 @@ def add_monster(request):
                 monster.is_approved = False
                 monster.save()
 
-                if armor_form.is_valid() and armor_form.cleaned_data.get('value'):
+                if armor_form.cleaned_data.get('value'):
                     armor = armor_form.save(commit=False)
                     armor.monster = monster
                     armor.save()
-
-                if speed_form.is_valid() and speed_form.cleaned_data.get('movement_type'):
-                    speed = speed_form.save(commit=False)
-                    speed.monster = monster
-                    speed.save()
+                speeds_list = speeds_form.cleaned_data.get('speeds', [])
+                for movement_type, value in speeds_list:
+                    Speed.objects.create(
+                        monster=monster,
+                        movement_type=movement_type,
+                        value=value
+                    )
 
             messages.success(request, 'Монстр успешно добавлен. Он будет рассмотрен администратором.')
             return redirect('monster_detail', monster_id=monster.id)
     else:
         form = MonsterForm()
         armor_form = ArmorClassForm(prefix='armor')
-        speed_form = SpeedForm(prefix='speed')
+        speeds_form = MonsterSpeedsForm()
 
     context = {
         'form': form,
         'armor_form': armor_form,
-        'speed_form': speed_form,
+        'speeds_form': speeds_form,
     }
     return render(request, 'DnDSite/add_monster.html', context)
 
@@ -357,14 +359,15 @@ def edit_monster(request, monster_id):
         return redirect('monster_detail', monster_id=monster_id)
 
     armor_class = monster.armor_classes.first()
-    speed = monster.speeds.first()
+    current_speeds = monster.speeds.all()
+    speeds_initial = '\n'.join([f"{speed.movement_type}: {speed.value}" for speed in current_speeds])
 
     if request.method == 'POST':
         form = MonsterEditForm(request.POST, instance=monster, user=request.user)
         armor_form = ArmorClassForm(request.POST, instance=armor_class, prefix='armor')
-        speed_form = SpeedForm(request.POST, instance=speed, prefix='speed')
+        speeds_form = MonsterSpeedsForm(request.POST, initial={'speeds': speeds_initial})
 
-        if form.is_valid() and armor_form.is_valid() and speed_form.is_valid():
+        if form.is_valid() and armor_form.is_valid() and speeds_form.is_valid():
             with transaction.atomic():
                 monster = form.save(commit=False)
                 if monster.is_homebrew and not request.user.is_staff:
@@ -372,20 +375,20 @@ def edit_monster(request, monster_id):
                     messages.info(request, 'Монстр отправлен на повторное рассмотрение администратором.')
 
                 monster.save()
-
                 armor = armor_form.save(commit=False)
                 armor.monster = monster
                 if armor.value:
                     armor.save()
                 elif armor.pk:
                     armor.delete()
-
-                speed = speed_form.save(commit=False)
-                speed.monster = monster
-                if speed.value and speed.movement_type:
-                    speed.save()
-                elif speed.pk:
-                    speed.delete()
+                Speed.objects.filter(monster=monster).delete()
+                speeds_list = speeds_form.cleaned_data.get('speeds', [])
+                for movement_type, value in speeds_list:
+                    Speed.objects.create(
+                        monster=monster,
+                        movement_type=movement_type,
+                        value=value
+                    )
 
                 messages.success(request, 'Монстр успешно обновлен.')
                 if request.user.is_staff:
@@ -395,12 +398,12 @@ def edit_monster(request, monster_id):
     else:
         form = MonsterEditForm(instance=monster, user=request.user)
         armor_form = ArmorClassForm(instance=armor_class, prefix='armor')
-        speed_form = SpeedForm(instance=speed, prefix='speed')
+        speeds_form = MonsterSpeedsForm(initial={'speeds': speeds_initial})
 
     context = {
         'form': form,
         'armor_form': armor_form,
-        'speed_form': speed_form,
+        'speeds_form': speeds_form,
         'monster': monster,
         'is_admin': request.user.is_staff,
     }
