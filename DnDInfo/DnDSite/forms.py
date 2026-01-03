@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from .models import Monster, Spell, Equipment, Armor_class, Speed, Component
+from .models import Monster, Spell, Equipment, Armor_class, Speed, Component, Favorite
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -531,3 +531,16 @@ class MonsterSpeedsForm(forms.Form):
 
             return speeds_list
         return []
+
+class FavoriteForm(forms.Form):
+    content_type = forms.ChoiceField(
+        choices=Favorite.CONTENT_TYPES,
+        widget=forms.HiddenInput()
+    )
+    object_id = forms.IntegerField(
+        widget=forms.HiddenInput()
+    )
+    action = forms.CharField(
+        max_length=10,
+        widget=forms.HiddenInput()
+    )

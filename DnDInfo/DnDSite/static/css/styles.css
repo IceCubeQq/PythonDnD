@@ -1,60 +1,170 @@
+/* Общие улучшения для обеих тем */
+
+/* Улучшенные контрасты для текста */
+.card-body {
+    color: inherit;
+}
+
+/* Улучшенные шрифты */
 body {
-    background-color: #f8f9fa;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Roboto', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
+/* Улучшенные заголовки */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+/* Улучшенные ссылки */
+a {
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Улучшенные карточки */
 .card {
-    transition: transform 0.2s;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
-}
-
-.navbar {
+    transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Улучшенные кнопки */
+.btn {
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+/* Улучшенные формы */
+.form-control, .form-select {
+    transition: all 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Улучшенные таблицы */
+.table th {
+    font-weight: 600;
+}
+
+/* Улучшенные баджи */
 .badge {
     font-weight: 500;
+    letter-spacing: 0.5px;
 }
 
-.table th {
-    background-color: #f1f3f4;
-    border-top: none;
-}
-
+/* Адаптивные улучшения */
 @media (max-width: 768px) {
+    .display-4 {
+        font-size: 2rem;
+    }
+
+    .display-5 {
+        font-size: 1.75rem;
+    }
+
     .display-6 {
         font-size: 1.5rem;
     }
 
-    .card-header .d-flex {
-        flex-wrap: wrap;
-        justify-content: center;
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+
+    h3 {
+        font-size: 1.25rem;
     }
 }
 
-.bg-dnd-primary {
-    background-color: #4a148c !important;
+/* Анимации */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
-.text-dnd-gold {
-    color: #ffd700 !important;
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
 }
 
-.spell-card {
-    border-left: 5px solid;
+/* Специальные стили для D&D тематики */
+.navbar-brand {
+    font-family: 'MedievalSharp', cursive;
 }
 
-.spell-level-0 { border-color: #6c757d; }
-.spell-level-1 { border-color: #007bff; }
-.spell-level-2 { border-color: #28a745; }
-.spell-level-3 { border-color: #ffc107; }
-.spell-level-4 { border-color: #fd7e14; }
-.spell-level-5 { border-color: #dc3545; }
-.spell-level-6 { border-color: #6f42c1; }
-.spell-level-7 { border-color: #e83e8c; }
-.spell-level-8 { border-color: #20c997; }
-.spell-level-9 { border-color: #17a2b8; }
+/* Улучшения для статистики характеристик */
+.stat-badge {
+    font-size: 0.9em;
+    padding: 0.35em 0.65em;
+}
+
+/* Улучшения для страницы деталей */
+.monster-stats .card {
+    min-height: 120px;
+}
+
+/* Улучшения для пагинации */
+.pagination {
+    margin-bottom: 0;
+}
+
+/* Улучшения для выпадающих меню */
+.dropdown-menu {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Улучшения для алертов */
+.alert {
+    border: none;
+}
+
+/* Улучшения для секций с границами */
+.border-section {
+    border-bottom: 2px solid var(--bs-border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Улучшения для кнопок действий */
+.action-buttons {
+    gap: 0.5rem;
+}
+
+/* Улучшения для иконок */
+.bi {
+    vertical-align: -0.125em;
+}
+
+/* Улучшения для загрузки */
+.loading-spinner {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Улучшения для пустых состояний */
+.empty-state {
+    padding: 3rem 1rem;
+    text-align: center;
+    color: #6c757d;
+}
+
+.empty-state .bi {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}

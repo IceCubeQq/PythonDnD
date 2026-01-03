@@ -1,6 +1,18 @@
 from django.contrib import admin
-from .models import Monster, Spell, Equipment,Armor_class, Speed, Component
+from .models import Monster, Spell, Equipment, Armor_class, Speed, Component, Favorite
 
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    list_display = ('user', 'get_content_type_display', 'get_object_name', 'created_at')
+    list_filter = ('content_type', 'created_at')
+    search_fields = ('user__username', 'object_id')
+    ordering = ('-created_at',)
+
+    def get_object_name(self, obj):
+        return obj.get_object_name()
+
+    get_object_name.short_description = 'Объект'
 
 @admin.register(Monster)
 class MonsterAdmin(admin.ModelAdmin):

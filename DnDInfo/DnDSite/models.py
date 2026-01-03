@@ -192,3 +192,47 @@ class Component(models.Model):
 
     def __str__(self):
         return self.get_type_display()
+
+
+class Favorite(models.Model):
+    CONTENT_TYPES = [
+        ('monster', 'Монстр'),
+        ('spell', 'Заклинание'),
+        ('equipment', 'Снаряжение'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites', verbose_name="Пользователь")
+    content_type = models.CharField(max_length=20, choices=CONTENT_TYPES, verbose_name="Тип контента")
+    object_id = models.PositiveIntegerField(verbose_name="ID объекта")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата добавления")
+
+    class Meta:
+        verbose_name = 'Избранное'
+        verbose_name_plural = 'Избранные'
+        unique_together = ['user', 'content_type', 'object_id']
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.get_content_type_display()} #{self.object_id}"
+
+    def get_object(self):
+        if self.content_type == 'monster':
+            return Monster.objects.filter(id=self.object_id).first()
+        elif self.content_type == 'spell':
+            return Spell.objects.filter(id=self.object_id).first()
+        elif self.content_type == 'equipment':
+            return Equipment.objects.filter(id=self.object_id).first()
+        return None
+
+    def get_object_name(self):
+        obj = self.get_object()
+        return obj.name if obj else f"Объект #{self.object_id}"
+
+    def get_object_url(self):
+        if self.content_type == 'monster':
+            return f"/monsters/{self.object_id}/"
+        elif self.content_type == 'spell':
+            return f"/spells/{self.object_id}/"
+        elif self.content_type == 'equipment':
+            return f"/equipment/{self.object_id}/"
+        return "#"

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-bs-theme="light">
+<html lang="ru" data-bs-theme="auto">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,12 +24,15 @@
     <!-- Собственные стили -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
+    <!-- Дополнительные стили для темной темы -->
+    <link rel="stylesheet" href="{% static 'css/dark-theme.css' %}">
+
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
 
     {% block extra_css %}{% endblock %}
 </head>
-<body class="d-flex flex-column min-vh-100">
+<body>
     <!-- Навигационная панель -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow">
         <div class="container">
@@ -153,8 +156,8 @@
                     </div>
 
                     <!-- Темная/светлая тема -->
-                    <button class="btn btn-sm btn-outline-light me-3" id="themeToggle">
-                        <i class="bi bi-moon" id="themeIcon"></i>
+                    <button class="btn btn-sm btn-outline-light me-3" id="themeToggle" title="Сменить тему">
+                        <i class="bi bi-moon-fill" id="themeIcon"></i>
                     </button>
 
                     <!-- Пользовательское меню -->
@@ -170,6 +173,17 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             {% if user.is_authenticated %}
+                                <li>
+                                    <a class="dropdown-item" href="{% url 'favorites_list' %}">
+                                        <i class="bi bi-star text-warning"></i> Избранное
+                                        {% with favorite_count=user.favorites.count %}
+                                            {% if favorite_count > 0 %}
+                                            <span class="badge bg-warning text-dark float-end">{{ favorite_count }}</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </a>
+                                </li>
+
                                 {% if user.is_staff %}
                                 <li>
                                     <a class="dropdown-item" href="{% url 'admin_panel' %}">
@@ -183,11 +197,7 @@
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 {% endif %}
-                                <li>
-                                    <a class="dropdown-item" href="#">
-                                        <i class="bi bi-bookmark"></i> Избранное
-                                    </a>
-                                </li>
+
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
                                     <form action="{% url 'logout' %}" method="post" style="display: inline;">
@@ -244,9 +254,6 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Подвал -->
-
-
     <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -255,29 +262,44 @@
 
     <!-- Собственные скрипты -->
     <script>
-        // Управление темой
+        // Управление темой с улучшенной поддержкой
         const themeToggle = document.getElementById('themeToggle');
         const themeIcon = document.getElementById('themeIcon');
-        const body = document.body;
+        const html = document.documentElement;
 
         // Проверяем сохраненную тему
         const savedTheme = localStorage.getItem('theme') || 'light';
         if (savedTheme === 'dark') {
-            body.setAttribute('data-bs-theme', 'dark');
-            themeIcon.className = 'bi bi-sun';
+            html.setAttribute('data-bs-theme', 'dark');
+            themeIcon.className = 'bi bi-sun-fill';
+        } else {
+            html.setAttribute('data-bs-theme', 'light');
+            themeIcon.className = 'bi bi-moon-fill';
         }
 
         themeToggle.addEventListener('click', () => {
-            if (body.getAttribute('data-bs-theme') === 'dark') {
-                body.setAttribute('data-bs-theme', 'light');
-                themeIcon.className = 'bi bi-moon';
+            if (html.getAttribute('data-bs-theme') === 'dark') {
+                html.setAttribute('data-bs-theme', 'light');
+                themeIcon.className = 'bi bi-moon-fill';
                 localStorage.setItem('theme', 'light');
             } else {
-                body.setAttribute('data-bs-theme', 'dark');
-                themeIcon.className = 'bi bi-sun';
+                html.setAttribute('data-bs-theme', 'dark');
+                themeIcon.className = 'bi bi-sun-fill';
                 localStorage.setItem('theme', 'dark');
             }
+
+            // Принудительно обновляем некоторые элементы
+            updateThemeDependentElements();
         });
+
+        function updateThemeDependentElements() {
+            // Обновляем кастомные элементы, которые не обновляются автоматически
+            const customCards = document.querySelectorAll('.card.bg-light, .card.bg-white');
+            customCards.forEach(card => {
+                card.classList.toggle('bg-dark', html.getAttribute('data-bs-theme') === 'dark');
+                card.classList.toggle('text-white', html.getAttribute('data-bs-theme') === 'dark');
+            });
+        }
 
         // Поиск
         document.getElementById('searchButton').addEventListener('click', function() {
@@ -304,22 +326,6 @@
             });
         }, 5000);
 
-        // Загрузка количества ожидающих модерации (для админов)
-        {% if user.is_staff %}
-        $(document).ready(function() {
-            $.ajax({
-                url: '{% url "admin_panel" %}',
-                type: 'GET',
-                success: function(data) {
-                    // Парсим HTML для получения количества
-                    const tempDiv = $('<div>').html(data);
-                    const pendingCount = tempDiv.find('.badge.bg-danger').text() || '0';
-                    $('#pendingBadge').text(pendingCount);
-                }
-            });
-        });
-        {% endif %}
-
         // Подсветка активных ссылок в выпадающих меню
         $(document).ready(function() {
             const currentPath = window.location.pathname + window.location.search;
@@ -328,22 +334,6 @@
                 if (linkPath && currentPath.includes(linkPath.split('?')[0]) && linkPath !== '/') {
                     $(this).addClass('active');
                     $(this).parents('.dropdown').find('.dropdown-toggle').addClass('active');
-                }
-            });
-        });
-
-        // Плавная прокрутка к якорям
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                if (this.getAttribute('href') !== '#') {
-                    e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
                 }
             });
         });
@@ -358,122 +348,9 @@
                 }
             });
         });
-
-        // Индикатор загрузки страницы
-        window.addEventListener('load', function() {
-            document.body.classList.add('loaded');
-        });
-    </script>
-
-    <script>
-    // Функция для получения CSRF токена
-    function getCsrfToken() {
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-            const [name, value] = cookie.trim().split('=');
-            if (name === 'csrftoken') {
-                return decodeURIComponent(value);
-            }
-        }
-        return '';
-    }
     </script>
 
     <!-- Дополнительные скрипты из дочерних шаблонов -->
     {% block extra_js %}{% endblock %}
-
-    <!-- Стили для состояния загрузки -->
-    <style>
-        /* Плавное появление контента */
-        body:not(.loaded) main {
-            opacity: 0;
-            transition: opacity 0.3s ease-in;
-        }
-
-        body.loaded main {
-            opacity: 1;
-        }
-
-        /* Стили для активных ссылок */
-        .nav-link.active {
-            font-weight: 600;
-        }
-
-        .dropdown-item.active {
-            background-color: var(--bs-primary);
-            color: white;
-        }
-
-        /* Кастомный скроллбар */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 5px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        [data-bs-theme="dark"] ::-webkit-scrollbar-track {
-            background: #2c2c2c;
-        }
-
-        [data-bs-theme="dark"] ::-webkit-scrollbar-thumb {
-            background: #555;
-        }
-
-        [data-bs-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-            background: #777;
-        }
-
-        /* Анимация появления элементов */
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Стили для медиа */
-        @media (max-width: 768px) {
-            .footer {
-                text-align: center;
-            }
-
-            .input-group {
-                margin-top: 10px;
-            }
-
-            main {
-                padding-top: 70px;
-            }
-        }
-
-        /* Стили для печати */
-        @media print {
-            .navbar, .footer, .alert, .btn {
-                display: none !important;
-            }
-
-            main {
-                padding-top: 0 !important;
-            }
-
-            body {
-                background: white !important;
-                color: black !important;
-            }
-        }
-    </style>
 </body>
 </html>

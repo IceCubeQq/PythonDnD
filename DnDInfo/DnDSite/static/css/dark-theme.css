@@ -1,0 +1,359 @@
+/* Дополнительные стили для темной темы */
+
+[data-bs-theme="dark"] {
+    /* Основные цвета */
+    color-scheme: dark;
+
+    /* Общие исправления */
+    --bs-body-color: #dee2e6;
+    --bs-body-color-rgb: 222, 226, 230;
+    --bs-body-bg: #212529;
+    --bs-body-bg-rgb: 33, 37, 41;
+
+    /* Карточки */
+    --bs-card-bg: #2b3035;
+    --bs-card-border-color: #495057;
+
+    /* Таблицы */
+    --bs-table-bg: #2b3035;
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.05);
+    --bs-table-hover-bg: rgba(255, 255, 255, 0.075);
+    --bs-table-border-color: #495057;
+
+    /* Формы */
+    --bs-form-control-bg: #2b3035;
+    --bs-form-control-border-color: #495057;
+    --bs-form-control-color: #dee2e6;
+
+    /* Дропдауны */
+    --bs-dropdown-bg: #2b3035;
+    --bs-dropdown-link-color: #dee2e6;
+    --bs-dropdown-link-hover-color: #fff;
+    --bs-dropdown-link-hover-bg: #495057;
+    --bs-dropdown-border-color: #495057;
+}
+
+/* Исправления для конкретных элементов в темной теме */
+[data-bs-theme="dark"] body {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .card {
+    background-color: var(--bs-card-bg);
+    border-color: var(--bs-card-border-color);
+    color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .card.bg-light,
+[data-bs-theme="dark"] .card.bg-white {
+    background-color: var(--bs-card-bg) !important;
+    color: var(--bs-body-color) !important;
+}
+
+[data-bs-theme="dark"] .card-header {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-bottom-color: var(--bs-card-border-color);
+}
+
+[data-bs-theme="dark"] .card-footer {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-top-color: var(--bs-card-border-color);
+}
+
+[data-bs-theme="dark"] .table {
+    --bs-table-color: var(--bs-body-color);
+    color: var(--bs-table-color);
+}
+
+[data-bs-theme="dark"] .table th {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-color: var(--bs-table-border-color);
+}
+
+[data-bs-theme="dark"] .table td {
+    border-color: var(--bs-table-border-color);
+}
+
+[data-bs-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: var(--bs-table-striped-bg);
+}
+
+[data-bs-theme="dark"] .table-hover > tbody > tr:hover > * {
+    background-color: var(--bs-table-hover-bg);
+}
+
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+    background-color: var(--bs-form-control-bg);
+    border-color: var(--bs-form-control-border-color);
+    color: var(--bs-form-control-color);
+}
+
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus {
+    background-color: var(--bs-form-control-bg);
+    border-color: #86b7fe;
+    color: var(--bs-form-control-color);
+}
+
+[data-bs-theme="dark"] .form-control::placeholder {
+    color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .form-text {
+    color: #adb5bd !important;
+}
+
+[data-bs-theme="dark"] .dropdown-menu {
+    background-color: var(--bs-dropdown-bg);
+    border-color: var(--bs-dropdown-border-color);
+}
+
+[data-bs-theme="dark"] .dropdown-item {
+    color: var(--bs-dropdown-link-color);
+}
+
+[data-bs-theme="dark"] .dropdown-item:hover,
+[data-bs-theme="dark"] .dropdown-item:focus {
+    background-color: var(--bs-dropdown-link-hover-bg);
+    color: var(--bs-dropdown-link-hover-color);
+}
+
+[data-bs-theme="dark"] .list-group-item {
+    background-color: var(--bs-card-bg);
+    border-color: var(--bs-card-border-color);
+    color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .list-group-item.active {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+[data-bs-theme="dark"] .alert-light {
+    background-color: rgba(248, 249, 250, 0.15);
+    border-color: rgba(248, 249, 250, 0.3);
+    color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .text-muted {
+    color: #adb5bd !important;
+}
+
+[data-bs-theme="dark"] .text-dark {
+    color: #dee2e6 !important;
+}
+
+[data-bs-theme="dark"] .bg-light {
+    background-color: #2b3035 !important;
+}
+
+[data-bs-theme="dark"] .bg-white {
+    background-color: #2b3035 !important;
+}
+
+[data-bs-theme="dark"] .border,
+[data-bs-theme="dark"] .border-top,
+[data-bs-theme="dark"] .border-end,
+[data-bs-theme="dark"] .border-bottom,
+[data-bs-theme="dark"] .border-start {
+    border-color: #495057 !important;
+}
+
+[data-bs-theme="dark"] .border-light {
+    border-color: #495057 !important;
+}
+
+[data-bs-theme="dark"] .btn-outline-secondary {
+    color: #adb5bd;
+    border-color: #6c757d;
+}
+
+[data-bs-theme="dark"] .btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+[data-bs-theme="dark"] .btn-outline-light {
+    color: #f8f9fa;
+    border-color: #f8f9fa;
+}
+
+[data-bs-theme="dark"] .btn-outline-light:hover {
+    background-color: #f8f9fa;
+    color: #000;
+}
+
+/* Исправления для баджей */
+[data-bs-theme="dark"] .badge.bg-light {
+    background-color: #495057 !important;
+    color: #fff !important;
+}
+
+[data-bs-theme="dark"] .badge.bg-light.text-dark {
+    color: #fff !important;
+}
+
+/* Исправления для навигационных табов */
+[data-bs-theme="dark"] .nav-tabs {
+    border-bottom-color: #495057;
+}
+
+[data-bs-theme="dark"] .nav-tabs .nav-link {
+    color: #adb5bd;
+    border-color: transparent;
+}
+
+[data-bs-theme="dark"] .nav-tabs .nav-link:hover {
+    border-color: #495057;
+    color: #dee2e6;
+}
+
+[data-bs-theme="dark"] .nav-tabs .nav-link.active {
+    background-color: var(--bs-card-bg);
+    border-color: #495057 #495057 var(--bs-card-bg);
+    color: #dee2e6;
+}
+
+/* Исправления для пагинации */
+[data-bs-theme="dark"] .page-link {
+    background-color: var(--bs-card-bg);
+    border-color: #495057;
+    color: #dee2e6;
+}
+
+[data-bs-theme="dark"] .page-link:hover {
+    background-color: #495057;
+    border-color: #495057;
+    color: #fff;
+}
+
+[data-bs-theme="dark"] .page-item.disabled .page-link {
+    background-color: var(--bs-card-bg);
+    border-color: #495057;
+    color: #6c757d;
+}
+
+/* Исправления для текстовых полей формы */
+[data-bs-theme="dark"] textarea.form-control {
+    background-color: var(--bs-form-control-bg);
+    color: var(--bs-form-control-color);
+}
+
+/* Исправления для чекбоксов и радио-кнопок */
+[data-bs-theme="dark"] .form-check-input {
+    background-color: var(--bs-form-control-bg);
+    border-color: #6c757d;
+}
+
+[data-bs-theme="dark"] .form-check-input:checked {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+/* Исправления для переключателей */
+[data-bs-theme="dark"] .form-switch .form-check-input {
+    background-color: #495057;
+}
+
+[data-bs-theme="dark"] .form-switch .form-check-input:checked {
+    background-color: #0d6efd;
+}
+
+/* Контрастные улучшения для текста */
+[data-bs-theme="dark"] h1, [data-bs-theme="dark"] h2, [data-bs-theme="dark"] h3,
+[data-bs-theme="dark"] h4, [data-bs-theme="dark"] h5, [data-bs-theme="dark"] h6 {
+    color: #f8f9fa;
+}
+
+[data-bs-theme="dark"] .lead {
+    color: #e9ecef;
+}
+
+[data-bs-theme="dark"] small {
+    color: #adb5bd;
+}
+
+/* Исправления для модальных окон */
+[data-bs-theme="dark"] .modal-content {
+    background-color: var(--bs-card-bg);
+    color: var(--bs-body-color);
+}
+
+[data-bs-theme="dark"] .modal-header {
+    border-bottom-color: #495057;
+}
+
+[data-bs-theme="dark"] .modal-footer {
+    border-top-color: #495057;
+}
+
+/* Улучшения для скроллбара */
+[data-bs-theme="dark"] ::-webkit-scrollbar {
+    width: 12px;
+}
+
+[data-bs-theme="dark"] ::-webkit-scrollbar-track {
+    background: #2b3035;
+}
+
+[data-bs-theme="dark"] ::-webkit-scrollbar-thumb {
+    background: #495057;
+    border-radius: 6px;
+}
+
+[data-bs-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+    background: #6c757d;
+}
+
+/* Специальные исправления для вашего контента */
+[data-bs-theme="dark"] .spell-card {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-bs-theme="dark"] .jumbotron {
+    background-color: #343a40 !important;
+    color: #f8f9fa;
+}
+
+[data-bs-theme="dark"] .jumbotron hr {
+    background-color: #6c757d;
+}
+
+/* Контраст для кнопок избранного */
+[data-bs-theme="dark"] .favorite-btn {
+    border-color: #ffc107;
+}
+
+[data-bs-theme="dark"] .favorite-btn.active {
+    background-color: #ffc107;
+    color: #000;
+}
+
+/* Улучшения для форм редактирования */
+[data-bs-theme="dark"] .form-floating > label {
+    color: #adb5bd;
+}
+
+[data-bs-theme="dark"] .form-floating > .form-control:focus ~ label,
+[data-bs-theme="dark"] .form-floating > .form-control:not(:placeholder-shown) ~ label,
+[data-bs-theme="dark"] .form-floating > .form-select ~ label {
+    color: #86b7fe;
+}
+
+/* Исправления для кода */
+[data-bs-theme="dark"] code {
+    color: #e83e8c;
+    background-color: rgba(232, 62, 140, 0.1);
+}
+
+/* Улучшения для подсказок (tooltips) */
+[data-bs-theme="dark"] .tooltip .tooltip-inner {
+    background-color: #495057;
+    color: #f8f9fa;
+}
+
+[data-bs-theme="dark"] .tooltip .tooltip-arrow::before {
+    border-color: #495057 transparent transparent transparent;
+}

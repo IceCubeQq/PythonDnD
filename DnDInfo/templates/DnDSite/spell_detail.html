@@ -2,10 +2,39 @@
 
 {% block content %}
 <div class="container">
-    <!-- Навигация назад -->
-    <a href="{% url 'spell_list' %}" class="btn btn-outline-secondary mb-3">
-        ← Назад к списку заклинаний
-    </a>
+    <!-- Кнопки управления и навигация -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="{% url 'spell_list' %}{% if spell.is_homebrew %}?show_homebrew=true{% endif %}"
+           class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Назад к списку
+        </a>
+
+        <div class="btn-group">
+            <!-- Кнопка избранного -->
+            {% if user.is_authenticated %}
+            <button class="btn btn-outline-warning favorite-btn"
+                    data-type="spell"
+                    data-id="{{ spell.id }}"
+                    data-action="add"
+                    id="favoriteBtn">
+                <i class="bi bi-star"></i>
+                <span id="favoriteText">В избранное</span>
+            </button>
+            {% endif %}
+
+            <!-- Кнопки управления -->
+            {% if request.user.is_staff or request.user == spell.created_by %}
+            <a href="{% url 'edit_spell' spell.id %}" class="btn btn-outline-warning">
+                <i class="bi bi-pencil"></i> Редактировать
+            </a>
+            {% if request.user.is_staff and spell.is_homebrew %}
+            <a href="{% url 'delete_spell' spell.id %}" class="btn btn-outline-danger">
+                <i class="bi bi-trash"></i> Удалить
+            </a>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
 
     <!-- Основная карточка заклинания -->
     <div class="card shadow">
@@ -25,19 +54,19 @@
                                 {{ spell.level }} уровень
                             {% endif %}
                         </span>
-                        
+
                         <!-- Школа магии -->
                         <span class="badge bg-info fs-6">
                             {{ spell.get_school_display }}
                         </span>
-                        
+
                         <!-- Ритуал -->
                         {% if spell.ritual %}
                         <span class="badge bg-warning text-dark fs-6">
                             Ритуал
                         </span>
                         {% endif %}
-                        
+
                         <!-- Концентрация -->
                         {% if spell.concentration %}
                         <span class="badge bg-danger fs-6">
@@ -48,7 +77,7 @@
                 </div>
             </div>
         </div>
-        
+
         <div class="card-body">
             <div class="row">
                 <!-- Основные характеристики -->
@@ -58,8 +87,19 @@
                         <h4 class="border-bottom pb-2">Описание</h4>
                         <p class="lead">{{ spell.desc|linebreaks }}</p>
                     </div>
-                    
 
+                    <!-- Информация о homebrew -->
+                    {% if spell.is_homebrew %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-stars"></i> <strong>Homebrew заклинание</strong>
+                        {% if spell.created_by %}
+                        <br><small>Автор: {{ spell.created_by.username }}</small>
+                        {% endif %}
+                        {% if not spell.is_approved %}
+                        <br><span class="badge bg-warning text-dark">Ожидает одобрения администратора</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
                 </div>
 
                 <!-- Боковая панель с информацией -->
@@ -111,6 +151,18 @@
                                 {% endif %}
                             </div>
                             {% endif %}
+
+                            <!-- Компоненты -->
+                            <div class="mb-3">
+                                <strong>Компоненты:</strong><br>
+                                {% if components %}
+                                    {% for component in components %}
+                                        <span class="badge bg-secondary">{{ component.get_type_display }}</span>
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="text-muted">Не указаны</span>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
 
@@ -135,61 +187,159 @@
                 <div class="col">
                     <small class="text-muted">
                         ID заклинания: {{ spell.id }} |
-                        Обновлено: {% now "SHORT_DATETIME_FORMAT" %}
+                        {% if spell.created_at %}
+                            Добавлено: {{ spell.created_at|date:"d.m.Y H:i" }}
+                        {% else %}
+                            Обновлено: {% now "SHORT_DATETIME_FORMAT" %}
+                        {% endif %}
                     </small>
                 </div>
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <a href="{% url 'spell_list' %}{% if spell.is_homebrew %}?show_homebrew=true{% endif %}"
-                       class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left"></i> Назад к списку
-                    </a>
-
-                    <!-- Кнопки управления -->
-                    {% if request.user.is_authenticated %}
-                        {% if request.user.is_staff or request.user == spell.created_by %}
-                        <div class="btn-group">
-                            <a href="{% url 'edit_spell' spell.id %}" class="btn btn-outline-warning">
-                                <i class="bi bi-pencil"></i> Редактировать
-                            </a>
-                            {% if request.user.is_staff and spell.is_homebrew %}
-                            <a href="{% url 'delete_spell' spell.id %}" class="btn btn-outline-danger">
-                                <i class="bi bi-trash"></i> Удалить
-                            </a>
-                            {% endif %}
-                        </div>
-                        {% endif %}
-                    {% endif %}
-                </div>
                 <div class="col-auto">
-                    <!-- Ссылка для добавления в избранное (заглушка) -->
-                    <button class="btn btn-sm btn-outline-success">
-                        <i class="bi bi-star"></i> В избранное
-                    </button>
+                    {% if user.is_authenticated and not spell.is_homebrew %}
+                    <a href="{% url 'add_spell' %}" class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-plus-circle"></i> Создать свой вариант
+                    </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Стили для улучшения внешнего вида -->
 <style>
-    .card {
-        border-radius: 10px;
-        overflow: hidden;
-    }
-    .badge {
-        font-size: 0.9em;
-        padding: 0.5em 0.8em;
-    }
-    .lead {
-        font-size: 1.1rem;
-        line-height: 1.6;
-    }
-    .border-bottom {
-        border-bottom: 2px solid #dee2e6 !important;
-    }
-    .table th {
-        width: 40%;
-    }
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.badge {
+    font-size: 0.9em;
+    padding: 0.5em 0.8em;
+}
+
+.lead {
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.border-bottom {
+    border-bottom: 2px solid #dee2e6 !important;
+}
+
+.table th {
+    width: 40%;
+}
+
+/* Стили для кнопки избранного */
+.favorite-btn.active {
+    background-color: #ffc107;
+    color: white;
+}
+
+.favorite-btn.active:hover {
+    background-color: #e0a800;
+}
+
+@keyframes starPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.favorite-btn.active i {
+    animation: starPulse 0.3s ease-in-out;
+}
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const favoriteBtn = document.getElementById('favoriteBtn');
+    const favoriteText = document.getElementById('favoriteText');
+
+    if (favoriteBtn) {
+        // Проверяем, есть ли уже в избранном
+        const contentType = favoriteBtn.dataset.type;
+        const objectId = favoriteBtn.dataset.id;
+
+        checkFavoriteStatus(contentType, objectId);
+
+        // Обработка клика
+        favoriteBtn.addEventListener('click', function() {
+            const action = this.dataset.action;
+            toggleFavorite(contentType, objectId, action, this);
+        });
+    }
+
+    function checkFavoriteStatus(contentType, objectId) {
+        fetch(`/favorites/check/${contentType}/${objectId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.is_favorite) {
+                    favoriteBtn.dataset.action = 'remove';
+                    favoriteBtn.innerHTML = '<i class="bi bi-star-fill"></i> <span id="favoriteText">В избранном</span>';
+                    favoriteBtn.classList.add('active');
+                }
+            });
+    }
+
+    function toggleFavorite(contentType, objectId, action, btn) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+        // Показываем индикатор загрузки
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.disabled = true;
+
+        fetch('/favorites/toggle/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `content_type=${contentType}&object_id=${objectId}&action=${action}&csrfmiddlewaretoken=${csrfToken}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.action === 'added') {
+                    btn.dataset.action = 'remove';
+                    btn.innerHTML = '<i class="bi bi-star-fill"></i> <span id="favoriteText">В избранном</span>';
+                    btn.classList.add('active');
+                    showToast('success', data.message);
+                } else if (data.action === 'removed') {
+                    btn.dataset.action = 'add';
+                    btn.innerHTML = '<i class="bi bi-star"></i> <span id="favoriteText">В избранное</span>';
+                    btn.classList.remove('active');
+                    showToast('success', data.message);
+                }
+            } else {
+                showToast('error', data.message || 'Ошибка');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('error', 'Ошибка сети');
+        })
+        .finally(() => {
+            btn.disabled = false;
+        });
+    }
+
+    function showToast(type, message) {
+        // Создаем alert
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+});
+</script>
 {% endblock %}

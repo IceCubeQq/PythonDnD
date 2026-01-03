@@ -36,7 +36,10 @@ urlpatterns = [
          views.approve_content, name='approve_content'),
     path('admin-panel/reject/<str:content_type>/<int:content_id>/',
          views.reject_content, name='reject_content'),
-    path('admin-panel/moderate-bulk/',
-         views.moderate_bulk, name='moderate_bulk'),
+    path('admin-panel/moderate-bulk/', views.moderate_bulk, name='moderate_bulk'),
+
+    path('favorites/toggle/', views.toggle_favorite, name='toggle_favorite'),
+    path('favorites/', views.favorites_list, name='favorites_list'),
+    path('favorites/check/<str:content_type>/<int:object_id>/', views.check_favorite, name='check_favorite'),
 
 ]

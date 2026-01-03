@@ -2,28 +2,38 @@
 
 {% block content %}
 <div class="container">
-    <!-- Кнопки управления -->
+    <!-- Кнопки управления и навигация -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <a href="{% url 'equipment_list' %}{% if equipment.is_homebrew %}?show_homebrew=true{% endif %}"
            class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Назад к снаряжению
+            <i class="bi bi-arrow-left"></i> Назад к списку
         </a>
 
-        <!-- Кнопки управления для homebrew -->
-        {% if request.user.is_authenticated %}
-            {% if request.user.is_staff or request.user == equipment.created_by %}
-            <div class="btn-group">
-                <a href="{% url 'edit_equipment' equipment.id %}" class="btn btn-outline-warning">
-                    <i class="bi bi-pencil"></i> Редактировать
-                </a>
-                {% if request.user.is_staff and equipment.is_homebrew %}
-                <a href="{% url 'delete_equipment' equipment.id %}" class="btn btn-outline-danger">
-                    <i class="bi bi-trash"></i> Удалить
-                </a>
-                {% endif %}
-            </div>
+        <div class="btn-group">
+            <!-- Кнопка избранного -->
+            {% if user.is_authenticated %}
+            <button class="btn btn-outline-warning favorite-btn"
+                    data-type="equipment"
+                    data-id="{{ equipment.id }}"
+                    data-action="add"
+                    id="favoriteBtn">
+                <i class="bi bi-star"></i>
+                <span id="favoriteText">В избранное</span>
+            </button>
             {% endif %}
-        {% endif %}
+
+            <!-- Кнопки управления -->
+            {% if request.user.is_staff or request.user == equipment.created_by %}
+            <a href="{% url 'edit_equipment' equipment.id %}" class="btn btn-outline-warning">
+                <i class="bi bi-pencil"></i> Редактировать
+            </a>
+            {% if request.user.is_staff and equipment.is_homebrew %}
+            <a href="{% url 'delete_equipment' equipment.id %}" class="btn btn-outline-danger">
+                <i class="bi bi-trash"></i> Удалить
+            </a>
+            {% endif %}
+            {% endif %}
+        </div>
     </div>
 
     <!-- Основная информация -->
@@ -59,10 +69,22 @@
                                 {{ equipment.description|linebreaks }}
                             </div>
                         {% else %}
+                        <p class="text-muted">Описание отсутствует</p>
                         {% endif %}
                     </div>
 
-
+                    <!-- Информация о homebrew -->
+                    {% if equipment.is_homebrew %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-stars"></i> <strong>Homebrew снаряжение</strong>
+                        {% if equipment.created_by %}
+                        <br><small>Автор: {{ equipment.created_by.username }}</small>
+                        {% endif %}
+                        {% if not equipment.is_approved %}
+                        <br><span class="badge bg-warning text-dark">Ожидает одобрения администратора</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
                 </div>
 
                 <!-- Правая колонка - характеристики -->
@@ -81,13 +103,21 @@
                                     <tr>
                                         <th scope="row">Вес</th>
                                         <td>
-                                            {{ equipment.get_weight_display }}
+                                            {% if equipment.weight %}
+                                                {{ equipment.weight }} фунтов
+                                            {% else %}
+                                                <span class="text-muted">Не указан</span>
+                                            {% endif %}
                                         </td>
                                     </tr>
                                     <tr>
                                         <th scope="row">Стоимость</th>
                                         <td>
-                                            {{ equipment.get_cost_display }}
+                                            {% if equipment.cost_quantity %}
+                                                {{ equipment.cost_quantity }} {{ equipment.get_cost_unit_display }}
+                                            {% else %}
+                                                Бесплатно
+                                            {% endif %}
                                         </td>
                                     </tr>
                                     <tr>
@@ -104,8 +134,26 @@
                                         <th scope="row">ID предмета</th>
                                         <td><code>{{ equipment.id }}</code></td>
                                     </tr>
+                                    {% if equipment.created_at %}
+                                    <tr>
+                                        <th scope="row">Добавлен</th>
+                                        <td>{{ equipment.created_at|date:"d.m.Y H:i" }}</td>
+                                    </tr>
+                                    {% endif %}
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+
+                    <!-- Справочник по весу -->
+                    <div class="card mt-3 border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0">⚖️ Весовые категории</h6>
+                        </div>
+                        <div class="card-body small">
+                            <p><strong>Легкие:</strong> менее 5 фунтов</p>
+                            <p><strong>Средние:</strong> 5-15 фунтов</p>
+                            <p><strong>Тяжелые:</strong> более 15 фунтов</p>
                         </div>
                     </div>
                 </div>
@@ -117,21 +165,19 @@
             <div class="row">
                 <div class="col">
                     <small class="text-muted">
-                        ID: {{ equipment.id }} |
-                        {% if equipment.created_at %}
-                            Добавлено: {{ equipment.created_at|date:"d.m.Y H:i" }}
-                        {% else %}
-                            Обновлено: {% now "SHORT_DATETIME_FORMAT" %}
+                        ID: {{ equipment.id }}
+                        {% if equipment.description %}
+                        | <i class="bi bi-text-paragraph"></i> Длина описания: {{ equipment.description|length }} символов
                         {% endif %}
                     </small>
                 </div>
-                {% if equipment.description %}
                 <div class="col-auto">
-                    <small class="text-muted">
-                        <i class="bi bi-text-paragraph"></i> Длина описания: {{ equipment.description|length }} символов
-                    </small>
+                    {% if user.is_authenticated and not equipment.is_homebrew %}
+                    <a href="{% url 'add_equipment' %}" class="btn btn-sm btn-outline-success">
+                        <i class="bi bi-plus-circle"></i> Создать свой вариант
+                    </a>
+                    {% endif %}
                 </div>
-                {% endif %}
             </div>
         </div>
     </div>
@@ -156,12 +202,14 @@
                                     </a>
                                 </h6>
                                 <div class="mb-2">
+                                    {% if item.weight %}
                                     <span class="badge bg-light text-dark">
-                                        {{ item.get_weight_display }}
+                                        {{ item.weight }} фунтов
                                     </span>
+                                    {% endif %}
                                     {% if item.cost_quantity %}
                                     <span class="badge bg-warning">
-                                        {{ item.get_cost_display }}
+                                        {{ item.cost_quantity }} {{ item.get_cost_unit_display }}
                                     </span>
                                     {% endif %}
                                 </div>
@@ -170,6 +218,11 @@
                                     {{ item.description|truncatechars:100 }}
                                 </p>
                                 {% endif %}
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a href="{% url 'equipment_detail' item.id %}" class="btn btn-sm btn-outline-primary">
+                                    Подробнее
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -186,28 +239,142 @@
     {% endif %}
 </div>
 
-<!-- Стили для улучшения отображения -->
 <style>
-    .card {
-        border-radius: 8px;
-        overflow: hidden;
-    }
-    .lead {
-        font-size: 1.1rem;
-        line-height: 1.6;
-    }
-    .table th {
-        width: 40%;
-        font-weight: 500;
-    }
-    .badge {
-        font-weight: 500;
-    }
+.card {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.lead {
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.table th {
+    width: 40%;
+    font-weight: 500;
+}
+
+.badge {
+    font-weight: 500;
+}
+
+.border-bottom {
+    border-bottom: 2px solid #dee2e6 !important;
+}
+
+/* Стили для кнопки избранного */
+.favorite-btn.active {
+    background-color: #ffc107;
+    color: white;
+}
+
+.favorite-btn.active:hover {
+    background-color: #e0a800;
+}
+
+@keyframes starPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.favorite-btn.active i {
+    animation: starPulse 0.3s ease-in-out;
+}
 </style>
 
 <script>
-// Показать/скрыть полное описание
 document.addEventListener('DOMContentLoaded', function() {
+    const favoriteBtn = document.getElementById('favoriteBtn');
+    const favoriteText = document.getElementById('favoriteText');
+
+    if (favoriteBtn) {
+        // Проверяем, есть ли уже в избранном
+        const contentType = favoriteBtn.dataset.type;
+        const objectId = favoriteBtn.dataset.id;
+
+        checkFavoriteStatus(contentType, objectId);
+
+        // Обработка клика
+        favoriteBtn.addEventListener('click', function() {
+            const action = this.dataset.action;
+            toggleFavorite(contentType, objectId, action, this);
+        });
+    }
+
+    function checkFavoriteStatus(contentType, objectId) {
+        fetch(`/favorites/check/${contentType}/${objectId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.is_favorite) {
+                    favoriteBtn.dataset.action = 'remove';
+                    favoriteBtn.innerHTML = '<i class="bi bi-star-fill"></i> <span id="favoriteText">В избранном</span>';
+                    favoriteBtn.classList.add('active');
+                }
+            });
+    }
+
+    function toggleFavorite(contentType, objectId, action, btn) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+        // Показываем индикатор загрузки
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.disabled = true;
+
+        fetch('/favorites/toggle/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `content_type=${contentType}&object_id=${objectId}&action=${action}&csrfmiddlewaretoken=${csrfToken}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.action === 'added') {
+                    btn.dataset.action = 'remove';
+                    btn.innerHTML = '<i class="bi bi-star-fill"></i> <span id="favoriteText">В избранном</span>';
+                    btn.classList.add('active');
+                    showToast('success', data.message);
+                } else if (data.action === 'removed') {
+                    btn.dataset.action = 'add';
+                    btn.innerHTML = '<i class="bi bi-star"></i> <span id="favoriteText">В избранное</span>';
+                    btn.classList.remove('active');
+                    showToast('success', data.message);
+                }
+            } else {
+                showToast('error', data.message || 'Ошибка');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('error', 'Ошибка сети');
+        })
+        .finally(() => {
+            btn.disabled = false;
+        });
+    }
+
+    function showToast(type, message) {
+        // Создаем alert
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+
+    // Показать/скрыть полное описание
     const descriptionElement = document.querySelector('.lead');
     if (descriptionElement && descriptionElement.textContent.length > 500) {
         const shortText = descriptionElement.textContent.substring(0, 500) + '...';

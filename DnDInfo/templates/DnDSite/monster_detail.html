@@ -1,4 +1,5 @@
 {% extends "DnDSite/base.html" %}
+{% load dnd_filters %}
 
 {% block content %}
 <div class="container">
@@ -9,20 +10,31 @@
             <i class="bi bi-arrow-left"></i> Назад к списку
         </a>
 
-        {% if request.user.is_authenticated %}
-            {% if request.user.is_staff or request.user == monster.created_by %}
-            <div class="btn-group">
-                <a href="{% url 'edit_monster' monster.id %}" class="btn btn-outline-warning">
-                    <i class="bi bi-pencil"></i> Редактировать
-                </a>
-                {% if request.user.is_staff and monster.is_homebrew %}
-                <a href="{% url 'delete_monster' monster.id %}" class="btn btn-outline-danger">
-                    <i class="bi bi-trash"></i> Удалить
-                </a>
-                {% endif %}
-            </div>
+        <div class="btn-group">
+            <!-- Кнопка избранного -->
+            {% if user.is_authenticated %}
+            <button class="btn btn-outline-warning favorite-btn"
+                    data-type="monster"
+                    data-id="{{ monster.id }}"
+                    data-action="add"
+                    id="favoriteBtn">
+                <i class="bi bi-star"></i>
+                <span id="favoriteText">В избранное</span>
+            </button>
             {% endif %}
-        {% endif %}
+
+            <!-- Кнопки управления -->
+            {% if request.user.is_staff or request.user == monster.created_by %}
+            <a href="{% url 'edit_monster' monster.id %}" class="btn btn-outline-warning">
+                <i class="bi bi-pencil"></i> Редактировать
+            </a>
+            {% if request.user.is_staff and monster.is_homebrew %}
+            <a href="{% url 'delete_monster' monster.id %}" class="btn btn-outline-danger">
+                <i class="bi bi-trash"></i> Удалить
+            </a>
+            {% endif %}
+            {% endif %}
+        </div>
     </div>
 
     <!-- Заголовок с информацией о homebrew -->
@@ -44,7 +56,16 @@
 
         <h1 class="display-5 fw-bold">{{ monster.name }}</h1>
         <div class="d-flex justify-content-center gap-3 mt-3">
-
+            <span class="badge bg-primary fs-6">
+                <i class="bi bi-rulers"></i>
+                {% if monster.size == 'Tiny' %}Крошечный
+                {% elif monster.size == 'Small' %}Маленький
+                {% elif monster.size == 'Medium' %}Средний
+                {% elif monster.size == 'Large' %}Большой
+                {% elif monster.size == 'Huge' %}Огромный
+                {% elif monster.size == 'Gargantuan' %}Гигантский
+                {% else %}{{ monster.size }}{% endif %}
+            </span>
             <span class="badge bg-success fs-6">
                 <i class="bi bi-tags"></i> {{ monster.type }}
             </span>
@@ -199,6 +220,7 @@
                             {% endfor %}
                         </div>
                         {% else %}
+                        <p class="text-muted">Класс брони не указан</p>
                         {% endif %}
                     </div>
                 </div>
@@ -218,7 +240,7 @@
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <div>
                                     <strong>
-                                        {{ speed.get_display_name }}
+                                        {{ speed.movement_type|get_movement_display }}
                                     </strong>
                                 </div>
                                 <span class="badge bg-success rounded-pill fs-6">{{ speed.value }}</span>
@@ -244,7 +266,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th scope="row"> Размер</th>
+                                    <th scope="row">Размер</th>
                                     <td class="text-end">
                                         {% if monster.size == 'Tiny' %}Крошечный
                                         {% elif monster.size == 'Small' %}Маленький
@@ -422,6 +444,9 @@
                 </div>
                 {% endfor %}
             {% else %}
+            <div class="col-12">
+                <p class="text-muted">Похожие монстры не найдены.</p>
+            </div>
             {% endif %}
             {% endwith %}
         </div>
@@ -485,50 +510,123 @@
 .text-info {
     color: #0dcaf0 !important;
 }
+
+/* Стили для кнопки избранного */
+.favorite-btn.active {
+    background-color: #ffc107;
+    color: white;
+}
+
+.favorite-btn.active:hover {
+    background-color: #e0a800;
+}
+
+@keyframes starPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.favorite-btn.active i {
+    animation: starPulse 0.3s ease-in-out;
+}
 </style>
 
 <script>
-// Плавная прокрутка для навигации
 document.addEventListener('DOMContentLoaded', function() {
-    // Добавляем подсказки для модификаторов
+    const favoriteBtn = document.getElementById('favoriteBtn');
+    const favoriteText = document.getElementById('favoriteText');
+
+    if (favoriteBtn) {
+        // Проверяем, есть ли уже в избранном
+        const contentType = favoriteBtn.dataset.type;
+        const objectId = favoriteBtn.dataset.id;
+
+        checkFavoriteStatus(contentType, objectId);
+
+        // Обработка клика
+        favoriteBtn.addEventListener('click', function() {
+            const action = this.dataset.action;
+            toggleFavorite(contentType, objectId, action, this);
+        });
+    }
+
+    function checkFavoriteStatus(contentType, objectId) {
+        fetch(`/favorites/check/${contentType}/${objectId}/`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.is_favorite) {
+                    favoriteBtn.dataset.action = 'remove';
+                    favoriteBtn.innerHTML = '<i class="bi bi-star-fill"></i> <span id="favoriteText">В избранном</span>';
+                    favoriteBtn.classList.add('active');
+                }
+            });
+    }
+
+    function toggleFavorite(contentType, objectId, action, btn) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+        // Показываем индикатор загрузки
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.disabled = true;
+
+        fetch('/favorites/toggle/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `content_type=${contentType}&object_id=${objectId}&action=${action}&csrfmiddlewaretoken=${csrfToken}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.action === 'added') {
+                    btn.dataset.action = 'remove';
+                    btn.innerHTML = '<i class="bi bi-star-fill"></i> <span id="favoriteText">В избранном</span>';
+                    btn.classList.add('active');
+                    showToast('success', data.message);
+                } else if (data.action === 'removed') {
+                    btn.dataset.action = 'add';
+                    btn.innerHTML = '<i class="bi bi-star"></i> <span id="favoriteText">В избранное</span>';
+                    btn.classList.remove('active');
+                    showToast('success', data.message);
+                }
+            } else {
+                showToast('error', data.message || 'Ошибка');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('error', 'Ошибка сети');
+        })
+        .finally(() => {
+            btn.disabled = false;
+        });
+    }
+
+    function showToast(type, message) {
+        // Создаем alert
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+
+    // Плавная прокрутка для навигации
     const modifiers = document.querySelectorAll('.text-success, .text-danger');
     modifiers.forEach(mod => {
         mod.setAttribute('title', 'Положительный модификатор увеличивает шанс успеха');
     });
-
-    // Копирование информации о монстре
-    const copyMonsterInfo = () => {
-        const monsterName = "{{ monster.name }}";
-        const monsterStats = `
-${monsterName}
-Размер: {{ monster.size }}
-Тип: {{ monster.type }}
-Здоровье: {{ monster.hit_points }} HP
-
-ХАРАКТЕРИСТИКИ:
-Сила: {{ monster.strength }} ({% if strength_mod >= 0 %}+{% endif %}{{ strength_mod }})
-Ловкость: {{ monster.dexterity }} ({% if dexterity_mod >= 0 %}+{% endif %}{{ dexterity_mod }})
-Телосложение: {{ monster.constitution }} ({% if constitution_mod >= 0 %}+{% endif %}{{ constitution_mod }})
-Интеллект: {{ monster.intelligence }} ({% if intelligence_mod >= 0 %}+{% endif %}{{ intelligence_mod }})
-Мудрость: {{ monster.wisdom }} ({% if wisdom_mod >= 0 %}+{% endif %}{{ wisdom_mod }})
-Харизма: {{ monster.charisma }} ({% if charisma_mod >= 0 %}+{% endif %}{{ charisma_mod }})
-
-КЛАСС БРОНИ:
-{% for armor in armor_classes %}{{ armor.get_type_display }}: {{ armor.value }}
-{% endfor %}
-
-СКОРОСТЬ:
-{% for speed in speeds %}{{ speed.movement_type }}: {{ speed.value }}
-{% endfor %}
-        `.trim();
-    };
-
-    // Добавляем кнопку копирования, если нужно
-    const copyBtn = document.createElement('button');
-    copyBtn.className = 'btn btn-outline-info btn-sm mt-3';
-    copyBtn.innerHTML = '<i class="bi bi-clipboard"></i> Скопировать статы';
-    copyBtn.onclick = copyMonsterInfo;
-    document.querySelector('.text-center.mb-4').appendChild(copyBtn);
 });
 </script>
 {% endblock %}
