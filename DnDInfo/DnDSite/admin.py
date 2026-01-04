@@ -19,7 +19,7 @@ class MonsterAdmin(admin.ModelAdmin):
     list_display = ('name', 'size', 'type', 'hit_points', 'strength', 'is_homebrew', 'is_approved', 'created_by',
                     'created_at')
     list_filter = ('size', 'type', 'is_homebrew', 'is_approved')
-    search_fields = ('name', 'type')
+    search_fields = ('name', 'type', 'created_by__username')
     ordering = ('-is_homebrew', 'name')
     list_editable = ('is_approved',)
     actions = ['approve_monsters', 'reject_monsters']
@@ -49,7 +49,7 @@ class SpellAdmin(admin.ModelAdmin):
     list_display = ('name', 'level', 'school', 'ritual', 'concentration', 'is_homebrew', 'is_approved', 'created_by',
                     'created_at')
     list_filter = ('level', 'school', 'ritual', 'concentration', 'is_homebrew', 'is_approved')
-    search_fields = ('name', 'desc')
+    search_fields = ('name', 'desc', 'created_by__username')
     ordering = ('-is_homebrew', 'name')
     list_editable = ('is_approved',)
     actions = ['approve_spells', 'reject_spells']
@@ -78,7 +78,7 @@ class SpellAdmin(admin.ModelAdmin):
 class EquipmentAdmin(admin.ModelAdmin):
     list_display = ('name', 'description_preview', 'weight', 'cost_quantity', 'cost_unit', 'is_homebrew',
                     'is_approved', 'created_by', 'created_at')
-    search_fields = ('name', 'description')
+    ssearch_fields = ('name', 'description', 'created_by__username')
     list_filter = ('cost_unit', 'is_homebrew', 'is_approved')
     list_editable = ('is_approved',)
     actions = ['approve_equipment', 'reject_equipment']
@@ -109,6 +109,23 @@ class EquipmentAdmin(admin.ModelAdmin):
 
     reject_equipment.short_description = "Отклонить выбранное снаряжение"
 
-admin.site.register(Armor_class)
-admin.site.register(Speed)
-admin.site.register(Component)
+@admin.register(Armor_class)
+class ArmorClassAdmin(admin.ModelAdmin):
+    list_display = ('monster', 'type', 'value')
+    list_filter = ('type',)
+    search_fields = ('monster__name',)
+    ordering = ('-value',)
+
+@admin.register(Speed)
+class SpeedAdmin(admin.ModelAdmin):
+    list_display = ('monster', 'movement_type', 'value')
+    list_filter = ('movement_type',)
+    search_fields = ('monster__name', 'movement_type')
+    ordering = ('monster',)
+
+@admin.register(Component)
+class ComponentAdmin(admin.ModelAdmin):
+    list_display = ('spell', 'type')
+    list_filter = ('type',)
+    search_fields = ('spell__name',)
+    ordering = ('spell',)

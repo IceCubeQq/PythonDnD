@@ -1,11 +1,12 @@
 {% extends "DnDSite/base.html" %}
 {% load static %}
-
 {% block title %}Панель модерации - D&D Справочник{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin-panel.css' %}">
+{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
-    <!-- Заголовок и статистика -->
     <div class="row mb-4">
         <div class="col">
             <h1 class="display-5 fw-bold text-center">
@@ -15,7 +16,6 @@
         </div>
     </div>
 
-    <!-- Статистика -->
     <div class="row justify-content-center">
         <div class="col-md-4 mb-3">
             <div class="card border-warning shadow">
@@ -42,7 +42,6 @@
         </div>
     </div>
 
-    <!-- Табы для навигации -->
     <ul class="nav nav-tabs mb-4 justify-content-center" id="moderationTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="monsters-tab" data-bs-toggle="tab"
@@ -73,9 +72,7 @@
         </li>
     </ul>
 
-    <!-- Контент табов -->
     <div class="tab-content" id="moderationTabsContent">
-        <!-- Таб монстров -->
         <div class="tab-pane fade show active" id="monsters" role="tabpanel">
             {% if pending_monsters %}
             <div class="card shadow">
@@ -186,13 +183,12 @@
                 </div>
             </div>
             {% else %}
-            <div class="alert alert-success text-center">
+            <div class="text-center">
                 <i class="bi bi-check-circle"></i> Все монстры проверены!
             </div>
             {% endif %}
         </div>
 
-        <!-- Таб заклинаний -->
         <div class="tab-pane fade" id="spells" role="tabpanel">
             {% if pending_spells %}
             <div class="card shadow">
@@ -303,13 +299,12 @@
                 </div>
             </div>
             {% else %}
-            <div class="alert alert-success text-center">
+            <div class="text-center">
                 <i class="bi bi-check-circle"></i> Все заклинания проверены!
             </div>
             {% endif %}
         </div>
 
-        <!-- Таб снаряжения -->
         <div class="tab-pane fade" id="equipment" role="tabpanel">
             {% if pending_equipment %}
             <div class="card shadow">
@@ -332,7 +327,6 @@
                                             <input type="checkbox" id="checkAllEquipment">
                                         </th>
                                         <th>Название</th>
-                                        <th>Вес / Стоимость</th>
                                         <th>Информация</th>
                                         <th>Автор</th>
                                         <th>Дата создания</th>
@@ -350,26 +344,8 @@
                                             <strong>{{ item.name }}</strong>
                                         </td>
                                         <td>
-                                            {% if item.weight %}
-                                            <span class="badge bg-secondary">{{ item.weight }} фн.</span>
-                                            {% endif %}
-                                            {% if item.cost_quantity %}
-                                            <span class="badge bg-warning">
-                                                {{ item.cost_quantity }} {{ item.get_cost_unit_display }}
-                                            </span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
                                             <small class="text-muted">
-                                                {% if item.weight and item.cost_quantity %}
-                                                Вес: {{ item.weight }} фн. | Цена: {{ item.cost_quantity }} {{ item.get_cost_unit_display }}
-                                                {% elif item.weight %}
-                                                Вес: {{ item.weight }} фн.
-                                                {% elif item.cost_quantity %}
-                                                Цена: {{ item.cost_quantity }} {{ item.get_cost_unit_display }}
-                                                {% else %}
-                                                Базовый предмет
-                                                {% endif %}
+                                                {{ item.get_short_info }}
                                             </small>
                                         </td>
                                         <td>
@@ -429,16 +405,14 @@
                 </div>
             </div>
             {% else %}
-            <div class="alert alert-success text-center">
+            <div class="text-center">
                 <i class="bi bi-check-circle"></i> Все снаряжение проверено!
             </div>
             {% endif %}
         </div>
 
-        <!-- Таб недавно одобренных -->
         <div class="tab-pane fade" id="approved" role="tabpanel">
             <div class="row justify-content-center">
-                <!-- Недавно одобренные монстры -->
                 <div class="col-md-4 mb-4">
                     <div class="card h-100">
                         <div class="card-header bg-success text-white text-center">
@@ -474,7 +448,6 @@
                     </div>
                 </div>
 
-                <!-- Недавно одобренные заклинания -->
                 <div class="col-md-4 mb-4">
                     <div class="card h-100">
                         <div class="card-header bg-success text-white text-center">
@@ -493,7 +466,7 @@
                                             <strong>{{ spell.name }}</strong>
                                             <div class="small text-muted">
                                                 {{ spell.get_school_display }} |
-                                                {% if spell.level == 0 %}Заговор{% else %}{{ spell.level }} ур.{% endif %}
+                                                {{ spell.get_level_badge_html|safe }}
                                             </div>
                                         </div>
                                         <a href="{% url 'spell_detail' spell.id %}"
@@ -511,7 +484,6 @@
                     </div>
                 </div>
 
-                <!-- Недавно одобренное снаряжение -->
                 <div class="col-md-4 mb-4">
                     <div class="card h-100">
                         <div class="card-header bg-success text-white text-center">
@@ -552,522 +524,7 @@
         </div>
     </div>
 </div>
-
-<style>
-/* Стили для панели модерации */
-.nav-tabs .nav-link {
-    font-weight: 500;
-}
-
-.nav-tabs .nav-link.active {
-    background-color: #fff;
-    border-color: #dee2e6 #dee2e6 #fff;
-    font-weight: 600;
-}
-
-.table th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-    text-align: center !important;
-}
-
-.table td {
-    vertical-align: middle;
-    text-align: center !important;
-}
-
-.btn-group-sm > .btn {
-    padding: 0.25rem 0.5rem;
-    font-size: 0.875rem;
-}
-
-/* Центрирование элементов таблицы */
-.table.text-center th,
-.table.text-center td {
-    text-align: center;
-}
-
-/* Анимации */
-.tab-pane {
-    animation: fadeIn 0.3s ease-in;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-/* Стили для чекбоксов */
-input[type="checkbox"] {
-    cursor: pointer;
-    transform: scale(1.2);
-}
-
-/* Карточки статистики */
-.card .display-4 {
-    font-size: 2.5rem;
-}
-
-/* Центрирование всех элементов */
-.text-center {
-    text-align: center !important;
-}
-
-.justify-content-center {
-    justify-content: center !important;
-}
-
-.align-items-center {
-    align-items: center !important;
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-    .card .display-4 {
-        font-size: 2rem;
-    }
-
-    .btn-group {
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .btn-group .btn {
-        margin-bottom: 0.25rem;
-    }
-
-    .table-responsive {
-        font-size: 0.85rem;
-    }
-
-    .nav-tabs {
-        flex-wrap: wrap;
-    }
-
-    .nav-item {
-        flex: 1 0 auto;
-        text-align: center;
-    }
-}
-
-/* Стили для списков */
-.list-group-item {
-    border-left: none;
-    border-right: none;
-    border-radius: 0 !important;
-}
-
-.list-group-item:first-child {
-    border-top: none;
-}
-
-.list-group-item:last-child {
-    border-bottom: none;
-}
-
-/* Стили для выравнивания в таблицах */
-.align-middle {
-    vertical-align: middle !important;
-}
-
-/* Центрирование заголовков карточек */
-.card-header h5, .card-header h6 {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* Центрирование кнопок действий */
-.btn-group.justify-content-center {
-    display: flex;
-    justify-content: center;
-}
-
-/* Центрирование футера таблиц */
-.card-footer .d-flex.justify-content-center {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-</style>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Функция для получения CSRF токена
-    function getCsrfToken() {
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-            const [name, value] = cookie.trim().split('=');
-            if (name === 'csrftoken') {
-                return decodeURIComponent(value);
-            }
-        }
-        return '';
-    }
-
-    const csrfToken = getCsrfToken();
-
-    // Функции для работы с чекбоксами
-    function setupCheckboxHandlers(selectAllBtnId, checkAllId, checkboxClass, counterId) {
-        const selectAllBtn = document.getElementById(selectAllBtnId);
-        const checkAll = document.getElementById(checkAllId);
-        const checkboxes = document.querySelectorAll(`.${checkboxClass}`);
-        const counter = document.getElementById(counterId);
-
-        // Обновление счетчика
-        function updateCounter() {
-            const checkedCount = document.querySelectorAll(`.${checkboxClass}:checked`).length;
-            if (counter) counter.textContent = checkedCount;
-        }
-
-        // Выбрать все
-        if (selectAllBtn) {
-            selectAllBtn.addEventListener('click', function() {
-                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-                checkboxes.forEach(cb => {
-                    cb.checked = !allChecked;
-                });
-                if (checkAll) checkAll.checked = !allChecked;
-                updateCounter();
-            });
-        }
-
-        // Главный чекбокс
-        if (checkAll) {
-            checkAll.addEventListener('change', function() {
-                checkboxes.forEach(cb => {
-                    cb.checked = this.checked;
-                });
-                updateCounter();
-            });
-        }
-
-        // Индивидуальные чекбоксы
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', function() {
-                const allChecked = Array.from(checkboxes).every(c => c.checked);
-                if (checkAll) checkAll.checked = allChecked;
-                updateCounter();
-            });
-        });
-
-        // Инициализация счетчика
-        updateCounter();
-    }
-
-    // Настройка для каждой таблицы
-    setupCheckboxHandlers('selectAllMonsters', 'checkAllMonsters', 'monster-checkbox', 'selectedCountMonsters');
-    setupCheckboxHandlers('selectAllSpells', 'checkAllSpells', 'spell-checkbox', 'selectedCountSpells');
-    setupCheckboxHandlers('selectAllEquipment', 'checkAllEquipment', 'equipment-checkbox', 'selectedCountEquipment');
-
-    // Обработка одобрения/отклонения отдельных элементов
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('approve-btn') ||
-            (e.target.parentElement && e.target.parentElement.classList.contains('approve-btn'))) {
-            e.preventDefault();
-            const btn = e.target.classList.contains('approve-btn') ? e.target : e.target.parentElement;
-            const type = btn.dataset.type;
-            const id = btn.dataset.id;
-
-            const typeNames = {
-                'monster': 'монстра',
-                'spell': 'заклинание',
-                'equipment': 'снаряжение'
-            };
-
-            const typeName = typeNames[type] || 'элемент';
-
-            if (confirm(`Одобрить этот ${typeName}?`)) {
-                // Показываем индикатор загрузки
-                const originalHtml = btn.innerHTML;
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-                btn.disabled = true;
-
-                fetch(`/admin-panel/approve/${type}/${id}/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrfToken,
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `csrfmiddlewaretoken=${encodeURIComponent(csrfToken)}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Удаляем строку из таблицы
-                        const row = btn.closest('tr');
-                        if (row) {
-                            row.style.opacity = '0.5';
-                            setTimeout(() => {
-                                row.remove();
-                                // Обновляем счетчики
-                                updateTableCounters(type);
-                                location.reload(); // Перезагружаем для обновления статистики
-                            }, 500);
-                        }
-                        showToast('success', data.message);
-                    } else {
-                        showToast('error', `Ошибка: ${data.error}`);
-                        btn.innerHTML = originalHtml;
-                        btn.disabled = false;
-                    }
-                })
-                .catch(error => {
-                    showToast('error', `Ошибка сети: ${error}`);
-                    btn.innerHTML = originalHtml;
-                    btn.disabled = false;
-                });
-            }
-        }
-
-        // Обработка отклонения
-        if (e.target.classList.contains('reject-btn') ||
-            (e.target.parentElement && e.target.parentElement.classList.contains('reject-btn'))) {
-            e.preventDefault();
-            const btn = e.target.classList.contains('reject-btn') ? e.target : e.target.parentElement;
-            const type = btn.dataset.type;
-            const id = btn.dataset.id;
-
-            const typeNames = {
-                'monster': 'монстра',
-                'spell': 'заклинание',
-                'equipment': 'снаряжение'
-            };
-
-            const typeName = typeNames[type] || 'элемент';
-
-            if (confirm(`Отклонить этот ${typeName}? Это действие нельзя отменить.`)) {
-                // Показываем индикатор загрузки
-                const originalHtml = btn.innerHTML;
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-                btn.disabled = true;
-
-                fetch(`/admin-panel/reject/${type}/${id}/`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrfToken,
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `csrfmiddlewaretoken=${encodeURIComponent(csrfToken)}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Удаляем строку из таблицы
-                        const row = btn.closest('tr');
-                        if (row) {
-                            row.style.opacity = '0.5';
-                            setTimeout(() => {
-                                row.remove();
-                                // Обновляем счетчики
-                                updateTableCounters(type);
-                                location.reload(); // Перезагружаем для обновления статистики
-                            }, 500);
-                        }
-                        showToast('success', data.message);
-                    } else {
-                        showToast('error', `Ошибка: ${data.error}`);
-                        btn.innerHTML = originalHtml;
-                        btn.disabled = false;
-                    }
-                })
-                .catch(error => {
-                    showToast('error', `Ошибка сети: ${error}`);
-                    btn.innerHTML = originalHtml;
-                    btn.disabled = false;
-                });
-            }
-        }
-    });
-
-    // Обновление счетчиков в таблице
-    function updateTableCounters(type) {
-        const counters = {
-            'monster': {
-                badge: document.querySelector('#monsters-tab .badge'),
-                table: document.querySelectorAll('.monster-checkbox').length
-            },
-            'spell': {
-                badge: document.querySelector('#spells-tab .badge'),
-                table: document.querySelectorAll('.spell-checkbox').length
-            },
-            'equipment': {
-                badge: document.querySelector('#equipment-tab .badge'),
-                table: document.querySelectorAll('.equipment-checkbox').length
-            }
-        };
-
-        if (counters[type]) {
-            const counter = counters[type];
-            if (counter.badge) {
-                counter.badge.textContent = counter.table;
-            }
-        }
-    }
-
-    // Функция для показа уведомлений
-    function showToast(type, message) {
-        // Создаем контейнер для тостов, если его нет
-        let toastContainer = document.getElementById('toastContainer');
-        if (!toastContainer) {
-            toastContainer = document.createElement('div');
-            toastContainer.id = 'toastContainer';
-            toastContainer.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                z-index: 9999;
-                max-width: 350px;
-            `;
-            document.body.appendChild(toastContainer);
-        }
-
-        // Создаем toast
-        const toastId = 'toast-' + Date.now();
-        const toast = document.createElement('div');
-        toast.id = toastId;
-        toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0`;
-        toast.setAttribute('role', 'alert');
-        toast.setAttribute('aria-live', 'assertive');
-        toast.setAttribute('aria-atomic', 'true');
-
-        toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">
-                    ${message}
-                </div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>
-        `;
-
-        toastContainer.appendChild(toast);
-
-        // Инициализируем и показываем toast
-        const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
-        bsToast.show();
-
-        // Удаляем toast после скрытия
-        toast.addEventListener('hidden.bs.toast', function() {
-            toast.remove();
-        });
-    }
-
-    // Подтверждение массовых действий
-    const bulkForms = document.querySelectorAll('form[id$="Form"]');
-    bulkForms.forEach(form => {
-        form.addEventListener('submit', function(e) {
-            const selectedItems = this.querySelectorAll('input[name="selected_items"]:checked');
-            if (selectedItems.length === 0) {
-                e.preventDefault();
-                showToast('error', 'Выберите хотя бы один элемент.');
-                return;
-            }
-
-            const actionBtn = e.submitter;
-            const action = actionBtn.value;
-            const content_type = this.querySelector('input[name="content_type"]').value;
-
-            const typeNames = {
-                'monster': 'монстров',
-                'spell': 'заклинаний',
-                'equipment': 'предметов снаряжения'
-            };
-
-            const typeName = typeNames[content_type] || 'элементов';
-            const actionText = action === 'approve' ? 'одобрить' : 'отклонить';
-
-            if (!confirm(`Вы уверены, что хотите ${actionText} ${selectedItems.length} ${typeName}?`)) {
-                e.preventDefault();
-            } else {
-                // Показываем индикатор загрузки
-                actionBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Обработка...';
-                actionBtn.disabled = true;
-            }
-        });
-    });
-
-    // Обработка переключения табов - сохраняем активный таб
-    const moderationTabs = document.querySelectorAll('#moderationTabs button[data-bs-toggle="tab"]');
-    moderationTabs.forEach(tab => {
-        tab.addEventListener('shown.bs.tab', function(e) {
-            localStorage.setItem('activeModerationTab', e.target.id);
-        });
-    });
-
-    // Восстановление активного таба
-    const activeTabId = localStorage.getItem('activeModerationTab');
-    if (activeTabId) {
-        const activeTab = document.getElementById(activeTabId);
-        if (activeTab) {
-            const tab = new bootstrap.Tab(activeTab);
-            tab.show();
-        }
-    }
-
-     // Автоматическое переключение на нужный таб после отправки формы
-    document.addEventListener('DOMContentLoaded', function() {
-        // Получаем активный таб из URL или localStorage
-        const urlParams = new URLSearchParams(window.location.search);
-        const activeTabParam = urlParams.get('tab');
-
-        if (activeTabParam) {
-            const tabElement = document.getElementById(`${activeTabParam}-tab`);
-            if (tabElement) {
-                const tab = new bootstrap.Tab(tabElement);
-                tab.show();
-            }
-        }
-
-        // Добавляем обработчик для форм массовых действий
-        const bulkForms = document.querySelectorAll('form[id$="Form"]');
-        bulkForms.forEach(form => {
-            form.addEventListener('submit', function() {
-                // Определяем, какой таб активен
-                const activeTab = document.querySelector('#moderationTabs .nav-link.active');
-                if (activeTab) {
-                    const tabId = activeTab.id.replace('-tab', '');
-
-                    // Добавляем параметр в action URL
-                    const originalAction = this.action;
-                    const separator = originalAction.includes('?') ? '&' : '?';
-                    this.action = originalAction + separator + 'tab=' + tabId;
-                }
-            });
-        });
-    });
-});
-</script>
-
-<style>
-/* Стили для тостов */
-.toast {
-    animation: slideIn 0.3s ease-in;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
-/* Стили для строк при удалении */
-tr {
-    transition: opacity 0.5s ease;
-}
-
-/* Дополнительные стили для центрирования */
-.w-100 {
-    width: 100% !important;
-}
-
-.d-flex.flex-column {
-    flex-direction: column !important;
-}
-</style>
-
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'js/admin-panel.js' %}"></script>
 {% endblock %}

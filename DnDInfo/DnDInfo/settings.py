@@ -3,13 +3,21 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / '.env')
+env_file = BASE_DIR / '.env.production'
+if not env_file.exists():
+    env_file = BASE_DIR / '.env'
 
-# SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-zj57nz$9o!tc-kh^u4v(ketv1!&yv1&#1sxk1qv(3z57@$k2q(')
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key')
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+load_dotenv(env_file)
 
+SECRET_KEY = os.getenv('SECRET_KEY')
+if not SECRET_KEY:
+    raise ValueError(f"SECRET_KEY не установлен")
+
+DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+pythonanywhere_domain = os.getenv('PYTHONANYWHERE_DOMAIN')
+if pythonanywhere_domain:
+    ALLOWED_HOSTS.append(pythonanywhere_domain)
 
 if not DEBUG:
     ALLOWED_HOSTS.append('IceCubeQ.pythonanywhere.com')

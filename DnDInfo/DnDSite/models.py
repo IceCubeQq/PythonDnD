@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
+from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 
 class Monster(models.Model):
@@ -42,6 +44,44 @@ class Monster(models.Model):
         return f"{prefix}{self.name}"
 
 class Spell(models.Model):
+    LEVEL_COLORS = {
+        0: 'bg-secondary',
+        1: 'bg-primary',
+        2: 'bg-success',
+        3: 'bg-warning',
+        4: 'bg-danger',
+        5: 'bg-info',
+        6: 'bg-dark',
+        7: 'bg-secondary',
+        8: 'bg-secondary',
+        9: 'bg-secondary'
+    }
+
+    def get_level_display(self):
+        if self.level == 0:
+            return "Заговор"
+        return f"{self.level} ур."
+
+    def get_level_badge_class(self):
+        return self.LEVEL_COLORS.get(self.level, 'bg-secondary')
+
+    def get_level_badge_html(self):
+        level_text = self.get_level_display()
+        badge_class = self.get_level_badge_class()
+
+        extra_class = "text-dark" if self.level == 3 else ""
+        full_class = f"{badge_class} {extra_class}".strip()
+
+        return format_html(
+            '<span class="badge {}">{}</span>',
+            full_class,
+            level_text
+        )
+
+    @property
+    def is_cantrip(self):
+        return self.level == 0
+
     def get_absolute_url(self):
         return reverse('spell_detail', args=[str(self.id)])
 
@@ -76,6 +116,24 @@ class Spell(models.Model):
         verbose_name_plural = 'Заклинания'
 
 class Equipment(models.Model):
+    def get_short_info(self):
+        parts = []
+
+        if self.weight:
+            parts.append(f"Вес: {self.weight} фн.")
+
+        if self.cost_quantity:
+            parts.append(f"Цена: {self.cost_quantity} {self.get_cost_unit_display()}")
+
+        if not parts:
+            return "Базовый предмет"
+
+        return " | ".join(parts)
+
+    def get_short_info_html(self):
+        info = self.get_short_info()
+        return mark_safe(f'<small class="text-muted">{info}</small>')
+
     def get_similar_equipment(self, limit=5):
         from django.db.models import Q
         similar = Equipment.objects.filter(
