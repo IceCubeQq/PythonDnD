@@ -1,5 +1,7 @@
 import requests
 from django.conf import settings
+
+from .constants import SCHOOL_MAPPING, COMPONENT_MAPPING
 from .models import Monster, Spell, Equipment, Armor_class, Speed, Component
 import logging
 
@@ -106,18 +108,7 @@ class DataImporter:
         try:
             school_data = data.get('school', {})
             school_key = school_data.get('index', '')
-
-            school_mapping = {
-                'abjuration': 'abjuration',
-                'conjuration': 'conjuration',
-                'divination': 'divination',
-                'enchantment': 'enchantment',
-                'evocation': 'evocation',
-                'illusion': 'illusion',
-                'necromancy': 'necromancy',
-                'transmutation': 'transmutation'
-            }
-
+            school_mapping = SCHOOL_MAPPING
             school = school_mapping.get(school_key, 'abjuration')
             desc = ' '.join(data.get('desc', [])) if isinstance(data.get('desc'), list) else data.get('desc', '')
 
@@ -137,11 +128,7 @@ class DataImporter:
                 }
             )
             components = data.get('components', [])
-            component_mapping = {
-                'V': 'V',
-                'S': 'S',
-                'M': 'M'
-            }
+            component_mapping = COMPONENT_MAPPING
 
             for comp in components:
                 comp_type = component_mapping.get(comp, 'V')

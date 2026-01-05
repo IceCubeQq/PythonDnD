@@ -1,24 +1,18 @@
-/* Общие улучшения для обеих тем */
-
-/* Улучшенные контрасты для текста */
 .card-body {
     color: inherit;
 }
 
-/* Улучшенные шрифты */
 body {
     font-family: 'Roboto', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Улучшенные заголовки */
 h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
     line-height: 1.2;
 }
 
-/* Улучшенные ссылки */
 a {
     text-decoration: none;
     transition: color 0.2s ease;
@@ -28,7 +22,6 @@ a:hover {
     text-decoration: underline;
 }
 
-/* Улучшенные карточки */
 .card {
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -39,13 +32,11 @@ a:hover {
     box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
-/* Улучшенные кнопки */
 .btn {
     font-weight: 500;
     transition: all 0.2s ease;
 }
 
-/* Улучшенные формы */
 .form-control, .form-select {
     transition: all 0.2s ease;
 }
@@ -54,18 +45,15 @@ a:hover {
     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
 
-/* Улучшенные таблицы */
 .table th {
     font-weight: 600;
 }
 
-/* Улучшенные баджи */
 .badge {
     font-weight: 500;
     letter-spacing: 0.5px;
 }
 
-/* Адаптивные улучшения */
 @media (max-width: 768px) {
     .display-4 {
         font-size: 2rem;
@@ -92,7 +80,6 @@ a:hover {
     }
 }
 
-/* Анимации */
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
@@ -102,61 +89,50 @@ a:hover {
     animation: fadeIn 0.3s ease-in;
 }
 
-/* Специальные стили для D&D тематики */
 .navbar-brand {
     font-family: 'MedievalSharp', cursive;
 }
 
-/* Улучшения для статистики характеристик */
 .stat-badge {
     font-size: 0.9em;
     padding: 0.35em 0.65em;
 }
 
-/* Улучшения для страницы деталей */
 .monster-stats .card {
     min-height: 120px;
 }
 
-/* Улучшения для пагинации */
 .pagination {
     margin-bottom: 0;
 }
 
-/* Улучшения для выпадающих меню */
 .dropdown-menu {
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
 
-/* Улучшения для алертов */
 .alert {
     border: none;
 }
 
-/* Улучшения для секций с границами */
 .border-section {
     border-bottom: 2px solid var(--bs-border-color);
     padding-bottom: 1rem;
     margin-bottom: 1.5rem;
 }
 
-/* Улучшения для кнопок действий */
 .action-buttons {
     gap: 0.5rem;
 }
 
-/* Улучшения для иконок */
 .bi {
     vertical-align: -0.125em;
 }
 
-/* Улучшения для загрузки */
 .loading-spinner {
     width: 3rem;
     height: 3rem;
 }
 
-/* Улучшения для пустых состояний */
 .empty-state {
     padding: 3rem 1rem;
     text-align: center;

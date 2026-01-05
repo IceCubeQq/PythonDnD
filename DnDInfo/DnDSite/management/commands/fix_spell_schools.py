@@ -1,15 +1,16 @@
 # DnDSite/management/commands/fix_spell_schools.py
 from django.core.management.base import BaseCommand
-from DnDSite.models import Spell
+from ...models import Spell
 import requests
 import logging
+
+from ...constants import SPECIAL_CASES, SCHOOL_MAPPING
 
 logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
     help = 'Исправляет школы магии у заклинаний по данным из API'
-
     def add_arguments(self, parser):
         parser.add_argument(
             '--limit',
@@ -29,28 +30,7 @@ class Command(BaseCommand):
         index = index.replace(',', '')
         index = index.replace('&', '')
 
-        special_cases = {
-            'antipathy/sympathy': 'antipathy-sympathy',
-            'mordenkainen\'s sword': 'mordenkainens-sword',
-            'mordenkainen\'s faithful hound': 'mordenkainens-faithful-hound',
-            'mordenkainen\'s private sanctum': 'mordenkainens-private-sanctum',
-            'mordenkainen\'s magnificent mansion': 'mordenkainens-magnificent-mansion',
-            'tasha\'s hideous laughter': 'tashas-hideous-laughter',
-            'tasha\'s otherworldly guise': 'tashas-otherworldly-guise',
-            'tasha\'s mind whip': 'tashas-mind-whip',
-            'tasha\'s caustic brew': 'tashas-caustic-brew',
-            'otiluke\'s resilient sphere': 'otilukes-resilient-sphere',
-            'otiluke\'s freezing sphere': 'otilukes-freezing-sphere',
-            'leomund\'s tiny hut': 'leomunds-tiny-hut',
-            'leomund\'s secret chest': 'leomunds-secret-chest',
-            'leomund\'s trap': 'leomunds-trap',
-            'melf\'s acid arrow': 'melfs-acid-arrow',
-            'bigby\'s hand': 'bigbys-hand',
-            'drawmij\'s instant summons': 'drawmijs-instant-summons',
-            'nystul\'s magic aura': 'nystuls-magic-aura',
-            'ruh\'s hidden path': 'ruhs-hidden-path',
-            'arzah\'s black book': 'arzahs-black-book',
-        }
+        special_cases = SPECIAL_CASES
 
         name_lower = name.lower()
         if name_lower in special_cases:
@@ -85,16 +65,7 @@ class Command(BaseCommand):
                         school_data = data['school']
                         school_key = school_data.get('index', '')
 
-                        school_mapping = {
-                            'abjuration': 'abjuration',
-                            'conjuration': 'conjuration',
-                            'divination': 'divination',
-                            'enchantment': 'enchantment',
-                            'evocation': 'evocation',
-                            'illusion': 'illusion',
-                            'necromancy': 'necromancy',
-                            'transmutation': 'transmutation'
-                        }
+                        school_mapping = SCHOOL_MAPPING
 
                         new_school = school_mapping.get(school_key, spell.school)
 
@@ -103,19 +74,19 @@ class Command(BaseCommand):
                             spell.save()
                             updated_count += 1
                             self.stdout.write(
-                                self.style.SUCCESS(f"✓ Обновлено: {spell.name} -> {new_school}")
+                                self.style.SUCCESS(f"Обновлено: {spell.name} -> {new_school}")
                             )
                         else:
                             self.stdout.write(
-                                self.style.WARNING(f"✓ Без изменений: {spell.name} уже {spell.get_school_display()}")
+                                self.style.WARNING(f"Без изменений: {spell.name} уже {spell.get_school_display()}")
                             )
                     else:
                         self.stdout.write(
-                            self.style.ERROR(f"✗ Нет данных о школе: {spell.name}")
+                            self.style.ERROR(f"Нет данных о школе: {spell.name}")
                         )
                 else:
                     self.stdout.write(
-                        self.style.WARNING(f"✗ Не найдено напрямую (статус {response.status_code}): {spell.name}")
+                        self.style.WARNING(f"Не найдено напрямую (статус {response.status_code}): {spell.name}")
                     )
                     try:
                         list_url = f"{base_url}/spells"
@@ -147,7 +118,7 @@ class Command(BaseCommand):
                                             updated_count += 1
                                             self.stdout.write(
                                                 self.style.SUCCESS(
-                                                    f"✓ Обновлено через поиск: {spell.name} -> {new_school}")
+                                                    f"Обновлено через поиск: {spell.name} -> {new_school}")
                                             )
                     except Exception as e:
                         logger.error(f"Ошибка при поиске {spell.name}: {e}")
@@ -155,7 +126,7 @@ class Command(BaseCommand):
             except Exception as e:
                 logger.error(f"Ошибка при обновлении заклинания {spell.name}: {e}")
                 self.stdout.write(
-                    self.style.ERROR(f"✗ Ошибка для {spell.name}: {str(e)}")
+                    self.style.ERROR(f"Ошибка для {spell.name}: {str(e)}")
                 )
 
         self.stdout.write(

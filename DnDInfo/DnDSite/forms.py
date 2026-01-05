@@ -2,6 +2,8 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+
+from .constants import SIZE_CHOICES, SPEED_EXAMPLES
 from .models import Monster, Spell, Equipment, Armor_class, Speed, Component, Favorite
 
 
@@ -49,6 +51,15 @@ class MonsterForm(forms.ModelForm):
         required=False,
         label='Скорости'
     )
+
+    def get_size_choices(self):
+        return SIZE_CHOICES
+
+    def get_speed_examples_html(self):
+        examples = []
+        for speed_type, description in SPEED_EXAMPLES.items():
+            examples.append(f'<code>{speed_type}: 30</code> - {description}')
+        return '<br>'.join(examples)
 
     class Meta:
         model = Monster
@@ -105,15 +116,6 @@ class MonsterForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        SIZE_CHOICES = [
-            ('', 'Выберите размер'),
-            ('Tiny', 'Крошечный'),
-            ('Small', 'Маленький'),
-            ('Medium', 'Средний'),
-            ('Large', 'Большой'),
-            ('Huge', 'Огромный'),
-            ('Gargantuan', 'Гигантский'),
-        ]
         self.fields['size'].widget = forms.Select(
             choices=SIZE_CHOICES,
             attrs={'class': 'form-control'}

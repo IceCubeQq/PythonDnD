@@ -1,31 +1,22 @@
-/* Дополнительные стили для темной темы */
-
 [data-bs-theme="dark"] {
-    /* Основные цвета */
     color-scheme: dark;
-
-    /* Общие исправления */
     --bs-body-color: #dee2e6;
     --bs-body-color-rgb: 222, 226, 230;
     --bs-body-bg: #212529;
     --bs-body-bg-rgb: 33, 37, 41;
 
-    /* Карточки */
     --bs-card-bg: #2b3035;
     --bs-card-border-color: #495057;
 
-    /* Таблицы */
     --bs-table-bg: #2b3035;
     --bs-table-striped-bg: rgba(255, 255, 255, 0.05);
     --bs-table-hover-bg: rgba(255, 255, 255, 0.075);
     --bs-table-border-color: #495057;
 
-    /* Формы */
     --bs-form-control-bg: #2b3035;
     --bs-form-control-border-color: #495057;
     --bs-form-control-color: #dee2e6;
 
-    /* Дропдауны */
     --bs-dropdown-bg: #2b3035;
     --bs-dropdown-link-color: #dee2e6;
     --bs-dropdown-link-hover-color: #fff;
@@ -33,7 +24,6 @@
     --bs-dropdown-border-color: #495057;
 }
 
-/* Исправления для конкретных элементов в темной теме */
 [data-bs-theme="dark"] body {
     background-color: var(--bs-body-bg);
     color: var(--bs-body-color);
@@ -185,7 +175,6 @@
     color: #000;
 }
 
-/* Исправления для баджей */
 [data-bs-theme="dark"] .badge.bg-light {
     background-color: #495057 !important;
     color: #fff !important;
@@ -195,7 +184,6 @@
     color: #fff !important;
 }
 
-/* Исправления для навигационных табов */
 [data-bs-theme="dark"] .nav-tabs {
     border-bottom-color: #495057;
 }
@@ -216,7 +204,6 @@
     color: #dee2e6;
 }
 
-/* Исправления для пагинации */
 [data-bs-theme="dark"] .page-link {
     background-color: var(--bs-card-bg);
     border-color: #495057;
@@ -235,13 +222,11 @@
     color: #6c757d;
 }
 
-/* Исправления для текстовых полей формы */
 [data-bs-theme="dark"] textarea.form-control {
     background-color: var(--bs-form-control-bg);
     color: var(--bs-form-control-color);
 }
 
-/* Исправления для чекбоксов и радио-кнопок */
 [data-bs-theme="dark"] .form-check-input {
     background-color: var(--bs-form-control-bg);
     border-color: #6c757d;
@@ -252,7 +237,6 @@
     border-color: #0d6efd;
 }
 
-/* Исправления для переключателей */
 [data-bs-theme="dark"] .form-switch .form-check-input {
     background-color: #495057;
 }
@@ -261,7 +245,6 @@
     background-color: #0d6efd;
 }
 
-/* Контрастные улучшения для текста */
 [data-bs-theme="dark"] h1, [data-bs-theme="dark"] h2, [data-bs-theme="dark"] h3,
 [data-bs-theme="dark"] h4, [data-bs-theme="dark"] h5, [data-bs-theme="dark"] h6 {
     color: #f8f9fa;
@@ -275,7 +258,6 @@
     color: #adb5bd;
 }
 
-/* Исправления для модальных окон */
 [data-bs-theme="dark"] .modal-content {
     background-color: var(--bs-card-bg);
     color: var(--bs-body-color);
@@ -289,7 +271,6 @@
     border-top-color: #495057;
 }
 
-/* Улучшения для скроллбара */
 [data-bs-theme="dark"] ::-webkit-scrollbar {
     width: 12px;
 }
@@ -307,7 +288,6 @@
     background: #6c757d;
 }
 
-/* Специальные исправления для вашего контента */
 [data-bs-theme="dark"] .spell-card {
     background-color: rgba(255, 255, 255, 0.05);
 }
@@ -321,7 +301,6 @@
     background-color: #6c757d;
 }
 
-/* Контраст для кнопок избранного */
 [data-bs-theme="dark"] .favorite-btn {
     border-color: #ffc107;
 }
@@ -331,7 +310,6 @@
     color: #000;
 }
 
-/* Улучшения для форм редактирования */
 [data-bs-theme="dark"] .form-floating > label {
     color: #adb5bd;
 }
@@ -342,13 +320,11 @@
     color: #86b7fe;
 }
 
-/* Исправления для кода */
 [data-bs-theme="dark"] code {
     color: #e83e8c;
     background-color: rgba(232, 62, 140, 0.1);
 }
 
-/* Улучшения для подсказок (tooltips) */
 [data-bs-theme="dark"] .tooltip .tooltip-inner {
     background-color: #495057;
     color: #f8f9fa;
