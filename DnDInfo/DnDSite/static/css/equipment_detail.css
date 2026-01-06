@@ -1,0 +1,41 @@
+.card {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.lead {
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.table th {
+    width: 40%;
+    font-weight: 500;
+}
+
+.badge {
+    font-weight: 500;
+}
+
+.border-bottom {
+    border-bottom: 2px solid #dee2e6 !important;
+}
+
+.favorite-btn.active {
+    background-color: #ffc107;
+    color: white;
+}
+
+.favorite-btn.active:hover {
+    background-color: #e0a800;
+}
+
+@keyframes starPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.favorite-btn.active i {
+    animation: starPulse 0.3s ease-in-out;
+}
