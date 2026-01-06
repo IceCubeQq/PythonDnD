@@ -3,9 +3,16 @@
 
 {% block title %}Добавить монстра - D&D Справочник{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/add_monster.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/add_monster.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="container py-4">
-    <!-- Заголовок -->
     <div class="row mb-4">
         <div class="col">
             <h1 class="display-5 fw-bold">
@@ -14,16 +21,12 @@
             <p class="lead text-muted">Создайте собственного монстра для вашей кампании D&D</p>
         </div>
     </div>
-
-    <!-- Форма -->
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="card shadow border-0">
                 <div class="card-body p-4">
                     <form method="post" id="monsterForm" novalidate>
                         {% csrf_token %}
-
-                        <!-- Сообщения об ошибках формы -->
                         {% if form.non_field_errors %}
                         <div class="alert alert-danger">
                             {% for error in form.non_field_errors %}
@@ -33,7 +36,6 @@
                         {% endif %}
 
                         <div class="row g-3">
-                            <!-- Название монстра -->
                             <div class="col-md-6">
                                 <div class="form-floating mb-3">
                                     <input type="text" name="name" class="form-control" id="id_name"
@@ -47,7 +49,6 @@
                                 </div>
                             </div>
 
-                            <!-- Размер -->
                             <div class="col-md-6">
                                 <div class="form-floating mb-3">
                                     <select name="size" class="form-select" id="id_size" required>
@@ -67,7 +68,6 @@
                                 </div>
                             </div>
 
-                            <!-- Тип -->
                             <div class="col-12">
                                 <div class="form-floating mb-3">
                                     <input type="text" name="type" class="form-control" id="id_type"
@@ -82,7 +82,6 @@
                                 </div>
                             </div>
 
-                            <!-- Здоровье -->
                             <div class="col-md-6">
                                 <div class="form-floating mb-3">
                                     <input type="number" name="hit_points" class="form-control" id="id_hit_points"
@@ -97,14 +96,11 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Характеристики -->
                         <h4 class="mt-5 mb-3 border-bottom pb-2">
                             Характеристики
                         </h4>
 
                         <div class="row g-3">
-                            <!-- Сила -->
                             <div class="col-md-4 col-lg-2">
                                 <div class="form-floating mb-3">
                                     <input type="number" name="strength" class="form-control stat-input"
@@ -113,7 +109,6 @@
                                 </div>
                             </div>
 
-                            <!-- Ловкость -->
                             <div class="col-md-4 col-lg-2">
                                 <div class="form-floating mb-3">
                                     <input type="number" name="dexterity" class="form-control stat-input"
@@ -122,7 +117,6 @@
                                 </div>
                             </div>
 
-                            <!-- Телосложение -->
                             <div class="col-md-4 col-lg-2">
                                 <div class="form-floating mb-3">
                                     <input type="number" name="constitution" class="form-control stat-input"
@@ -131,7 +125,6 @@
                                 </div>
                             </div>
 
-                            <!-- Интеллект -->
                             <div class="col-md-4 col-lg-2">
                                 <div class="form-floating mb-3">
                                     <input type="number" name="intelligence" class="form-control stat-input"
@@ -140,7 +133,6 @@
                                 </div>
                             </div>
 
-                            <!-- Мудрость -->
                             <div class="col-md-4 col-lg-2">
                                 <div class="form-floating mb-3">
                                     <input type="number" name="wisdom" class="form-control stat-input"
@@ -149,7 +141,6 @@
                                 </div>
                             </div>
 
-                            <!-- Харизма -->
                             <div class="col-md-4 col-lg-2">
                                 <div class="form-floating mb-3">
                                     <input type="number" name="charisma" class="form-control stat-input"
@@ -159,7 +150,6 @@
                             </div>
                         </div>
 
-                        <!-- Класс брони -->
                         <h4 class="mt-5 mb-3 border-bottom pb-2">
                             <i class="bi bi-shield"></i> Класс брони
                         </h4>
@@ -185,7 +175,6 @@
                             </div>
                         </div>
 
-                        <!-- Скорость -->
                         <h4 class="mt-5 mb-3 border-bottom pb-2">
                             <i class="bi bi-speedometer2"></i> Скорость
                         </h4>
@@ -210,7 +199,6 @@
                             </div>
                         </div>
 
-                        <!-- Кнопки отправки -->
                         <div class="d-flex justify-content-between mt-5">
                             <button type="submit" class="btn btn-primary btn-lg">
                                 <i class="bi bi-save"></i> Сохранить монстра
@@ -220,7 +208,6 @@
                 </div>
             </div>
 
-            <!-- Подсказки по созданию монстра -->
             <div class="card mt-4 border-info">
                 <div class="card-header bg-info text-white">
                     <h5 class="mb-0"><i class="bi bi-lightbulb"></i> Советы по созданию монстра</h5>
@@ -246,202 +233,4 @@
     </div>
 </div>
 
-<style>
-/* Стили для формы */
-.form-floating > .form-control,
-.form-floating > .form-select {
-    height: calc(3.5rem + 2px);
-    padding: 1rem 0.75rem;
-}
-
-.form-floating > label {
-    padding: 1rem 0.75rem;
-}
-
-.form-control:focus,
-.form-select:focus {
-    border-color: #0d6efd;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-}
-
-.border-bottom {
-    border-bottom: 2px solid #dee2e6 !important;
-}
-
-.card {
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-/* Стили для характеристик */
-.stat-input {
-    font-weight: bold;
-    font-size: 1.1rem;
-}
-
-.stat-input:focus {
-    border-color: #6610f2;
-    box-shadow: 0 0 0 0.25rem rgba(102, 16, 242, 0.25);
-}
-
-/* Стили для модификаторов */
-.modifier-badge {
-    font-size: 0.8em;
-    padding: 0.3em 0.6em;
-    margin-left: 0.5em;
-    vertical-align: middle;
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-    .display-5 {
-        font-size: 1.8rem;
-    }
-
-    .stat-input {
-        font-size: 1rem;
-    }
-}
-</style>
-
-<script>
-// Динамический расчет модификаторов
-document.addEventListener('DOMContentLoaded', function() {
-    const statInputs = document.querySelectorAll('.stat-input');
-
-    function calculateModifier(value) {
-        return Math.floor((value - 10) / 2);
-    }
-
-    function updateModifierDisplay(input) {
-        const value = parseInt(input.value) || 0;
-        const modifier = calculateModifier(value);
-        const label = input.parentElement.querySelector('label');
-
-        // Добавляем модификатор к метке
-        const modifierText = modifier >= 0 ? `+${modifier}` : modifier.toString();
-        const existingModifier = label.querySelector('.modifier-badge');
-
-        if (existingModifier) {
-            existingModifier.remove();
-        }
-
-        const badge = document.createElement('span');
-        badge.className = `modifier-badge badge ms-2 ${modifier >= 0 ? 'bg-success' : 'bg-danger'}`;
-        badge.textContent = modifierText;
-        label.appendChild(badge);
-    }
-
-    // Обновляем при вводе
-    statInputs.forEach(input => {
-        input.addEventListener('input', function() {
-            updateModifierDisplay(this);
-        });
-
-        // Инициализация при загрузке
-        if (input.value) {
-            updateModifierDisplay(input);
-        }
-    });
-
-    // Валидация формы
-    const form = document.getElementById('monsterForm');
-    form.addEventListener('submit', function(e) {
-        let isValid = true;
-        const errorMessages = [];
-
-        // Проверка обязательных полей
-        const requiredInputs = form.querySelectorAll('input[required], select[required]');
-        requiredInputs.forEach(input => {
-            if (!input.value.trim()) {
-                isValid = false;
-                input.classList.add('is-invalid');
-                errorMessages.push(`Поле "${input.previousElementSibling?.textContent || 'Неизвестное поле'}" обязательно для заполнения`);
-            } else {
-                input.classList.remove('is-invalid');
-            }
-        });
-
-        // Проверка числовых полей
-        const numberInputs = form.querySelectorAll('input[type="number"]');
-        numberInputs.forEach(input => {
-            if (input.value) {
-                const value = parseInt(input.value);
-                const min = parseInt(input.min) || -Infinity;
-                const max = parseInt(input.max) || Infinity;
-
-                if (value < min || value > max) {
-                    isValid = false;
-                    input.classList.add('is-invalid');
-                    errorMessages.push(`Значение в поле "${input.previousElementSibling?.textContent || 'Неизвестное поле'}" должно быть от ${min} до ${max}`);
-                }
-            }
-        });
-
-        if (!isValid) {
-            e.preventDefault();
-            alert('Пожалуйста, исправьте следующие ошибки:\n\n' + errorMessages.join('\n'));
-        }
-    });
-
-    // Подсказки при наведении на характеристики
-    statInputs.forEach(input => {
-        input.addEventListener('mouseenter', function() {
-            const value = parseInt(this.value) || 0;
-            const modifier = calculateModifier(value);
-            const tooltipText = `Модификатор: ${modifier >= 0 ? '+' : ''}${modifier}`;
-
-            // Создаем всплывающую подсказку
-            const tooltip = document.createElement('div');
-            tooltip.className = 'tooltip bs-tooltip-top';
-            tooltip.innerHTML = `
-                <div class="tooltip-arrow"></div>
-                <div class="tooltip-inner">${tooltipText}</div>
-            `;
-
-            const rect = this.getBoundingClientRect();
-            tooltip.style.position = 'fixed';
-            tooltip.style.top = (rect.top - 40) + 'px';
-            tooltip.style.left = (rect.left + rect.width/2) + 'px';
-            tooltip.style.transform = 'translateX(-50%)';
-
-            this.tooltipElement = tooltip;
-            document.body.appendChild(tooltip);
-        });
-
-        input.addEventListener('mouseleave', function() {
-            if (this.tooltipElement) {
-                this.tooltipElement.remove();
-                this.tooltipElement = null;
-            }
-        });
-    });
-
-    // Автозаполнение модификаторов при вводе характеристик
-    function autoFillStats() {
-        // Пример: если пользователь хочет быстро заполнить стандартные значения
-        const autoFillBtn = document.createElement('button');
-        autoFillBtn.type = 'button';
-        autoFillBtn.className = 'btn btn-sm btn-outline-secondary mb-3';
-        autoFillBtn.innerHTML = '<i class="bi bi-magic"></i> Заполнить стандартные значения';
-        autoFillBtn.onclick = function() {
-            document.getElementById('id_strength').value = 10;
-            document.getElementById('id_dexterity').value = 10;
-            document.getElementById('id_constitution').value = 10;
-            document.getElementById('id_intelligence').value = 10;
-            document.getElementById('id_wisdom').value = 10;
-            document.getElementById('id_charisma').value = 10;
-
-            // Обновляем отображение модификаторов
-            statInputs.forEach(input => updateModifierDisplay(input));
-        };
-
-        const statsSection = document.querySelector('.border-bottom + .row');
-        statsSection.parentNode.insertBefore(autoFillBtn, statsSection);
-    }
-
-    // Вызываем автозаполнение
-    autoFillStats();
-});
-</script>
 {% endblock %}

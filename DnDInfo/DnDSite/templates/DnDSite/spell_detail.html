@@ -1,7 +1,16 @@
 {% extends "DnDSite/base.html" %}
 {% load dnd_filters %}
+{% load static %}
 
 {% block title %}{{ spell.name }} - D&D Справочник{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/spell_detail.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/spell_detail.js"></script>
+{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -42,7 +51,6 @@
                 </div>
                 <div class="col-auto">
                     <div class="d-flex gap-2">
-                        <!-- Используем template filter для отображения уровня -->
                         <span class="badge {% if spell.level == 0 %}bg-secondary{% else %}bg-primary{% endif %}">
                             {{ spell.level|spell_level_display }}
                         </span>
@@ -166,134 +174,4 @@
     </div>
 </div>
 
-<style>
-.card {
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.badge {
-    font-size: 0.9em;
-    padding: 0.5em 0.8em;
-}
-
-.lead {
-    font-size: 1.1rem;
-    line-height: 1.6;
-}
-
-.border-bottom {
-    border-bottom: 2px solid #dee2e6 !important;
-}
-
-.table th {
-    width: 40%;
-}
-.favorite-btn.active {
-    background-color: #ffc107;
-    color: white;
-}
-
-.favorite-btn.active:hover {
-    background-color: #e0a800;
-}
-
-@keyframes starPulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
-}
-
-.favorite-btn.active i {
-    animation: starPulse 0.3s ease-in-out;
-}
-</style>
-
-{% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const favoriteBtn = document.getElementById('favoriteBtn');
-    const favoriteText = document.getElementById('favoriteText');
-
-    if (favoriteBtn) {
-        const contentType = favoriteBtn.dataset.type;
-        const objectId = favoriteBtn.dataset.id;
-
-        checkFavoriteStatus(contentType, objectId);
-        favoriteBtn.addEventListener('click', function() {
-            const action = this.dataset.action;
-            toggleFavorite(contentType, objectId, action, this);
-        });
-    }
-
-    function checkFavoriteStatus(contentType, objectId) {
-        fetch(`/favorites/check/${contentType}/${objectId}/`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.is_favorite) {
-                    favoriteBtn.dataset.action = 'remove';
-                    favoriteBtn.innerHTML = '<i class="bi bi-star-fill"></i> <span id="favoriteText">В избранном</span>';
-                    favoriteBtn.classList.add('active');
-                }
-            });
-    }
-
-    function toggleFavorite(contentType, objectId, action, btn) {
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
-        const originalHtml = btn.innerHTML;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-        btn.disabled = true;
-
-        fetch('/favorites/toggle/', {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': csrfToken,
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `content_type=${contentType}&object_id=${objectId}&action=${action}&csrfmiddlewaretoken=${csrfToken}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                if (data.action === 'added') {
-                    btn.dataset.action = 'remove';
-                    btn.innerHTML = '<i class="bi bi-star-fill"></i> <span id="favoriteText">В избранном</span>';
-                    btn.classList.add('active');
-                    showToast('success', data.message);
-                } else if (data.action === 'removed') {
-                    btn.dataset.action = 'add';
-                    btn.innerHTML = '<i class="bi bi-star"></i> <span id="favoriteText">В избранное</span>';
-                    btn.classList.remove('active');
-                    showToast('success', data.message);
-                }
-            } else {
-                showToast('error', data.message || 'Ошибка');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('error', 'Ошибка сети');
-        })
-        .finally(() => {
-            btn.disabled = false;
-        });
-    }
-
-    function showToast(type, message) {
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
-        alertDiv.style.zIndex = '9999';
-        alertDiv.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        document.body.appendChild(alertDiv);
-
-        setTimeout(() => {
-            alertDiv.remove();
-        }, 3000);
-    }
-});
-</script>
-{% endblock %}
 {% endblock %}
