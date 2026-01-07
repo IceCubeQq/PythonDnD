@@ -113,6 +113,14 @@ class Speed(models.Model):
 
     MOVEMENT_MAP = MOVEMENT_TYPES
 
+    def get_display_name(self):
+        return self.MOVEMENT_MAP.get(self.movement_type, self.movement_type)
+
+    class Meta:
+        ordering = ['movement_type', 'monster']
+        verbose_name = 'Перемещение'
+        verbose_name_plural = 'Перемещения'
+
     def __str__(self):
         return f"{self.get_display_name()}: {self.value}"
 
@@ -128,6 +136,9 @@ class Component(models.Model):
 
     class Meta:
         unique_together = ['spell', 'type']
+        ordering = ['spell', 'type']
+        verbose_name = 'Компонент'
+        verbose_name_plural = 'Компоненты'
 
     def __str__(self):
         return self.get_type_display()
@@ -144,6 +155,15 @@ class Favorite(models.Model):
     content_type = models.CharField(max_length=20, choices=CONTENT_TYPES, verbose_name="Тип контента")
     object_id = models.PositiveIntegerField(verbose_name="ID объекта")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата добавления")
+
+    def get_object(self):
+        if self.content_type == 'monster':
+            return Monster.objects.filter(id=self.object_id).first()
+        elif self.content_type == 'spell':
+            return Spell.objects.filter(id=self.object_id).first()
+        elif self.content_type == 'equipment':
+            return Equipment.objects.filter(id=self.object_id).first()
+        return None
 
     class Meta:
         verbose_name = 'Избранное'

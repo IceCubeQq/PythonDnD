@@ -1,5 +1,12 @@
 from django.urls import path
-from .views import *
+from .views.base_views import index
+from .views.auth_views import *
+from .views.monster_views import *
+from .views.spell_views import *
+from .views.equipment_views import *
+from .views.admin_views import *
+from .views.favorite_views import *
+from .views.utils_views import monster_filter_api
 
 urlpatterns = [
     path('', index, name='index'),

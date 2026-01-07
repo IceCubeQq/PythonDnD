@@ -12,7 +12,6 @@
 
 {% block content %}
 <div class="container">
-    <!-- Кнопки управления и навигация -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <a href="{% url 'monster_list' %}{% if monster.is_homebrew %}?show_homebrew=true{% endif %}"
            class="btn btn-outline-secondary">
@@ -20,7 +19,6 @@
         </a>
 
         <div class="btn-group">
-            <!-- Кнопка избранного -->
             {% if user.is_authenticated %}
             <button class="btn btn-outline-warning favorite-btn"
                     data-type="monster"
@@ -32,7 +30,6 @@
             </button>
             {% endif %}
 
-            <!-- Кнопки управления -->
             {% if request.user.is_staff or request.user == monster.created_by %}
             <a href="{% url 'edit_monster' monster.id %}" class="btn btn-outline-warning">
                 <i class="bi bi-pencil"></i> Редактировать
@@ -46,7 +43,6 @@
         </div>
     </div>
 
-    <!-- Заголовок с информацией о homebrew -->
     <div class="text-center mb-4">
         {% if monster.is_homebrew %}
         <div class="d-inline-flex align-items-center mb-3">
@@ -85,17 +81,13 @@
     </div>
 
     <div class="card shadow-lg border-0">
-        <!-- Основная информация -->
         <div class="row g-0">
-            <!-- Левая колонка - характеристики -->
             <div class="col-lg-8">
                 <div class="p-4">
-                    <!-- Характеристики с модификаторами -->
                     <h3 class="border-bottom pb-2 mb-4">Характеристики</h3>
 
                     <div class="row row-cols-2 row-cols-md-3 g-4">
                         {% with monster as m %}
-                        <!-- Сила -->
                         <div class="col">
                             <div class="card h-100 border-primary">
                                 <div class="card-header bg-primary text-white text-center py-2">
@@ -111,8 +103,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Ловкость -->
                         <div class="col">
                             <div class="card h-100 border-success">
                                 <div class="card-header bg-success text-white text-center py-2">
@@ -128,8 +118,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Телосложение -->
                         <div class="col">
                             <div class="card h-100 border-danger">
                                 <div class="card-header bg-danger text-white text-center py-2">
@@ -145,8 +133,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Интеллект -->
                         <div class="col">
                             <div class="card h-100 border-info">
                                 <div class="card-header bg-info text-white text-center py-2">
@@ -162,8 +148,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Мудрость -->
                         <div class="col">
                             <div class="card h-100 border-warning">
                                 <div class="card-header bg-warning text-dark text-center py-2">
@@ -179,8 +163,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Харизма -->
                         <div class="col">
                             <div class="card h-100 border-secondary">
                                 <div class="card-header bg-secondary text-white text-center py-2">
@@ -198,8 +180,6 @@
                         </div>
                         {% endwith %}
                     </div>
-
-                    <!-- Класс брони -->
                     <div class="mt-5">
                         <h4 class="border-bottom pb-2 mb-3">
                             <i class="bi bi-shield"></i> Классы брони
@@ -234,11 +214,8 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Правая колонка - дополнительная информация -->
             <div class="col-lg-4 bg-light">
                 <div class="p-4 h-100">
-                    <!-- Скорость -->
                     <div class="mb-5">
                         <h4 class="border-bottom pb-2 mb-3">
                             <i class="bi bi-speedometer2"></i> Скорость
@@ -258,8 +235,6 @@
                         <p class="text-muted">Скорость не указана</p>
                         {% endif %}
                     </div>
-
-                    <!-- Статистика -->
                     <div class="mb-5">
                         <h4 class="border-bottom pb-2 mb-3">
                             <i class="bi bi-bar-chart"></i> Статистика
@@ -297,8 +272,6 @@
                             </tbody>
                         </table>
                     </div>
-
-                    <!-- Модификаторы навыков -->
                     <div>
                         <h4 class="border-bottom pb-2 mb-3">
                             <i class="bi bi-calculator"></i> Модификаторы навыков
@@ -349,8 +322,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Сложность боя (дополнительная информация) -->
         <div class="card-footer bg-dark text-white">
             <div class="row">
                 <div class="col-md-4 text-center">
@@ -396,8 +367,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Кнопка добавления homebrew (для зарегистрированных) -->
     {% if user.is_authenticated and not monster.is_homebrew %}
     <div class="text-center mt-4">
         <div class="card border-success">
@@ -415,14 +384,11 @@
         </div>
     </div>
     {% endif %}
-
-    <!-- Похожие монстры -->
     <div class="mt-5">
         <h3 class="border-bottom pb-2 mb-4">
             <i class="bi bi-arrow-right-circle"></i> Похожие монстры
         </h3>
         <div class="row row-cols-1 row-cols-md-3 g-4">
-            {% with similar_monsters=monster.get_similar_monsters|slice:":3" %}
             {% if similar_monsters %}
                 {% for similar in similar_monsters %}
                 <div class="col">
@@ -434,7 +400,15 @@
                                 </a>
                             </h5>
                             <div class="mb-2">
-                                <span class="badge bg-primary">{{ similar.size }}</span>
+                                <span class="badge bg-primary">
+                                    {% if similar.size == 'Tiny' %}Крошечный
+                                    {% elif similar.size == 'Small' %}Маленький
+                                    {% elif similar.size == 'Medium' %}Средний
+                                    {% elif similar.size == 'Large' %}Большой
+                                    {% elif similar.size == 'Huge' %}Огромный
+                                    {% elif similar.size == 'Gargantuan' %}Гигантский
+                                    {% else %}{{ similar.size }}{% endif %}
+                                </span>
                                 <span class="badge bg-success">{{ similar.type }}</span>
                             </div>
                             <div class="text-muted small">
@@ -455,7 +429,6 @@
                 <p class="text-muted">Похожие монстры не найдены.</p>
             </div>
             {% endif %}
-            {% endwith %}
         </div>
     </div>
 </div>

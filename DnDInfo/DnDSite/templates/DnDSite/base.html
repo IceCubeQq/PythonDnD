@@ -94,7 +94,7 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle {% if 'equipment' in request.path %}active{% endif %}"
                            href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-bag-fill"></i> Снаряжение
+                            <i class="bi bi-backpack"></i> Снаряжение
                         </a>
                         <ul class="dropdown-menu">
                             <li>
@@ -123,7 +123,10 @@
                     <div class="input-group me-3 d-none d-lg-flex" style="max-width: 300px;">
                         <input type="text" class="form-control form-control-sm"
                                placeholder="Поиск..." id="globalSearch">
-                        <button class="btn btn-outline-light btn-sm" type="button" id="searchButton">
+                        <button class="btn btn-outline-light btn-sm"
+                                type="button"
+                                id="searchButton"
+                                data-search-url="{% url 'monster_list' %}">
                             <i class="bi bi-search"></i>
                         </button>
                     </div>
@@ -220,77 +223,47 @@
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    {% block extra_js %}
+    <script src="/static/js/base.js"></script>
     <script>
-        const themeToggle = document.getElementById('themeToggle');
-        const themeIcon = document.getElementById('themeIcon');
-        const html = document.documentElement;
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        if (savedTheme === 'dark') {
-            html.setAttribute('data-bs-theme', 'dark');
-            themeIcon.className = 'bi bi-sun-fill';
-        } else {
-            html.setAttribute('data-bs-theme', 'light');
-            themeIcon.className = 'bi bi-moon-fill';
-        }
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchButton = document.getElementById('searchButton');
+        const globalSearch = document.getElementById('globalSearch');
 
-        themeToggle.addEventListener('click', () => {
-            if (html.getAttribute('data-bs-theme') === 'dark') {
-                html.setAttribute('data-bs-theme', 'light');
-                themeIcon.className = 'bi bi-moon-fill';
-                localStorage.setItem('theme', 'light');
-            } else {
-                html.setAttribute('data-bs-theme', 'dark');
-                themeIcon.className = 'bi bi-sun-fill';
-                localStorage.setItem('theme', 'dark');
+        if (!searchButton || !globalSearch) return;
+
+        function getSearchUrl() {
+            const currentPath = window.location.pathname;
+
+
+            if (currentPath.includes('/monsters') || currentPath === '/') {
+                return "{% url 'monster_list' %}";
+            } else if (currentPath.includes('/spells')) {
+                return "{% url 'spell_list' %}";
+            } else if (currentPath.includes('/equipment')) {
+                return "{% url 'equipment_list' %}";
             }
-            updateThemeDependentElements();
-        });
-
-        function updateThemeDependentElements() {
-            const customCards = document.querySelectorAll('.card.bg-light, .card.bg-white');
-            customCards.forEach(card => {
-                card.classList.toggle('bg-dark', html.getAttribute('data-bs-theme') === 'dark');
-                card.classList.toggle('text-white', html.getAttribute('data-bs-theme') === 'dark');
-            });
+            return "{% url 'monster_list' %}";
         }
-        document.getElementById('searchButton').addEventListener('click', function() {
-            const query = document.getElementById('globalSearch').value.trim();
+
+        function performSearch() {
+            const query = globalSearch.value.trim();
             if (query) {
-                window.location.href = `{% url 'monster_list' %}?search=${encodeURIComponent(query)}`;
+                const searchUrl = getSearchUrl();
+                window.location.href = searchUrl + '?search=' + encodeURIComponent(query);
             }
-        });
-        document.getElementById('globalSearch').addEventListener('keypress', function(e) {
+        }
+
+        searchButton.addEventListener('click', performSearch);
+
+        globalSearch.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
-                document.getElementById('searchButton').click();
+                performSearch();
             }
         });
-        setTimeout(function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(function(alert) {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            });
-        }, 5000);
-        $(document).ready(function() {
-            const currentPath = window.location.pathname + window.location.search;
-            $('.nav-link, .dropdown-item').each(function() {
-                const linkPath = $(this).attr('href');
-                if (linkPath && currentPath.includes(linkPath.split('?')[0]) && linkPath !== '/') {
-                    $(this).addClass('active');
-                    $(this).parents('.dropdown').find('.dropdown-toggle').addClass('active');
-                }
-            });
-        });
-        document.querySelectorAll('form').forEach(form => {
-            form.addEventListener('submit', function() {
-                const submitButton = this.querySelector('button[type="submit"]');
-                if (submitButton) {
-                    submitButton.disabled = true;
-                    submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Обработка...';
-                }
-            });
-        });
+    });
     </script>
-    {% block extra_js %}{% endblock %}
+    {% endblock %}
 </body>
 </html>

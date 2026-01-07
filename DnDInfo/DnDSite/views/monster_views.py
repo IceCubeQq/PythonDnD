@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from django.db import transaction
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-
+from ..services import MonsterService
 from ..constants import SORT_OPTIONS, TYPE_OPTIONS, SIZE_OPTIONS, SIZE_CHOICES, SPEED_EXAMPLES, SPEED_TYPES
 from ..forms import MonsterSpeedsForm, ArmorClassForm, MonsterForm, MonsterEditForm
 from ..models import Monster, Armor_class, Speed
@@ -88,8 +88,7 @@ def monster_detail(request, monster_id):
     monster = get_object_or_404(Monster, id=monster_id)
     armor_classes = Armor_class.objects.filter(monster=monster)
     speeds = Speed.objects.filter(monster=monster)
-
-    # Локальная функция для расчета модификатора (используем другое имя)
+    similar_monsters = MonsterService.get_similar_monsters(monster, limit=3)
     def calc_mod(score):
         return (score - 10) // 2
 
@@ -104,6 +103,7 @@ def monster_detail(request, monster_id):
         'wisdom_mod': calc_mod(monster.wisdom),
         'charisma_mod': calc_mod(monster.charisma),
         'can_edit': request.user.is_staff or (request.user == monster.created_by and not monster.is_homebrew),
+        'similar_monsters': similar_monsters,
     }
 
     return render(request, 'DnDSite/monster_detail.html', context)

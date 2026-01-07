@@ -1,10 +1,10 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from DnDSite.utils import DataImporter
-from DnDSite.models import Equipment
+from ...utils import *
+from ...models import *
 import logging
 
-from DnDInfo.DnDSite import models
+
 
 logger = logging.getLogger(__name__)
 

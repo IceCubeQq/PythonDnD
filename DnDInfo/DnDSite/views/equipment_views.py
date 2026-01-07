@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-
+from ..services import EquipmentService
 from .base_views import is_admin
 from ..constants import WEIGHT_OPTIONS, CURRENCY_UNITS, SORT_OPTIONS_EQUIPMENTS
 from ..forms import EquipmentForm, EquipmentEditForm
@@ -82,7 +82,7 @@ def equipment_list(request):
 
 def equipment_detail(request, equipment_id):
     equipment = get_object_or_404(Equipment, id=equipment_id)
-
+    similar_equipment = EquipmentService.get_similar_equipment(equipment, limit=3)
     if equipment.cost_quantity:
         cost_display = f"{equipment.cost_quantity} {equipment.get_cost_unit_display()}"
     else:
@@ -92,6 +92,7 @@ def equipment_detail(request, equipment_id):
         'equipment': equipment,
         'cost_display': cost_display,
         'can_edit': request.user.is_staff or (request.user == equipment.created_by and not equipment.is_homebrew),
+        'similar_equipment': similar_equipment,
     }
     return render(request, 'DnDSite/equipment_detail.html', context)
 

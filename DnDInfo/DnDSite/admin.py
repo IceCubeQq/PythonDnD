@@ -1,20 +1,15 @@
 from django.contrib import admin
+from django.urls import reverse
+from django.utils.html import format_html
 
 from .models import Component, Favorite, Speed, Armor_class, Equipment, Spell, Monster
-from .services import FavoriteService
 
 
 class FavoriteAdmin(admin.ModelAdmin):
-    list_display = ('user', 'get_content_type_display', 'object_id', 'get_object_name_display', 'created_at')
+    list_display = ('user', 'content_type', 'object_id', 'created_at')
     list_filter = ('content_type', 'created_at')
     search_fields = ('user__username', 'object_id')
     ordering = ('-created_at',)
-
-    def get_object_name_display(self, obj):
-        service = FavoriteService()
-        return service.get_object_name(obj)
-
-    get_object_name_display.short_description = 'Название объекта'
 
 
 @admin.register(Monster)
@@ -89,14 +84,21 @@ class SpeedAdmin(admin.ModelAdmin):
 
 @admin.register(Component)
 class ComponentAdmin(admin.ModelAdmin):
-    list_display = ('spell', 'type')
+    list_display = ('spell_link', 'get_type_display')
     list_filter = ('type',)
     search_fields = ('spell__name',)
-    ordering = ('spell',)
+    ordering = ('spell__name',)
 
-    def type(self, obj):
+    def spell_link(self, obj):
+        url = reverse('admin:DnDSite_spell_change', args=[obj.spell.id])
+        return format_html('<a href="{}">{}</a>', url, obj.spell.name)
+
+    spell_link.short_description = 'Заклинание'
+    spell_link.admin_order_field = 'spell__name'
+
+    def get_type_display(self, obj):
         return obj.get_type_display()
 
-    type.short_description = 'Тип компонента'
+    get_type_display.short_description = 'Тип компонента'
 
 admin.site.register(Favorite, FavoriteAdmin)

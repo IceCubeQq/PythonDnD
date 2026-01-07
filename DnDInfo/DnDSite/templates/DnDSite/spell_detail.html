@@ -172,6 +172,56 @@
             </div>
         </div>
     </div>
+    {% if similar_spells %}
+    <div class="mt-5">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="bi bi-magic"></i> Похожие заклинания</h5>
+            </div>
+            <div class="card-body">
+                <div class="row row-cols-1 row-cols-md-3 g-3">
+                    {% for similar in similar_spells %}
+                    <div class="col">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <a href="{% url 'spell_detail' similar.id %}" class="text-decoration-none">
+                                        {{ similar.name }}
+                                    </a>
+                                </h6>
+                                <div class="mb-2">
+                                    <span class="badge {% if similar.level == 0 %}bg-secondary{% else %}bg-primary{% endif %}">
+                                        {{ similar.level|spell_level_display }}
+                                    </span>
+                                    <span class="badge bg-info">
+                                        {{ similar.get_school_display }}
+                                    </span>
+                                    {% if similar.ritual %}
+                                    <span class="badge bg-warning text-dark">Ритуал</span>
+                                    {% endif %}
+                                    {% if similar.concentration %}
+                                    <span class="badge bg-danger">Концентрация</span>
+                                    {% endif %}
+                                </div>
+                                {% if similar.desc %}
+                                <p class="card-text small text-muted">
+                                    {{ similar.desc|truncatechars:120 }}
+                                </p>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a href="{% url 'spell_detail' similar.id %}" class="btn btn-sm btn-outline-primary">
+                                    Подробнее
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 {% endblock %}

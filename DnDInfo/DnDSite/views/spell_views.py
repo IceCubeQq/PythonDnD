@@ -4,7 +4,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-
+from ..services import SpellService
 from ..constants import SCHOOL_CHOICES_LIST, SORT_OPTIONS_SPELLS
 from ..forms import SpellForm, SpellEditForm
 from ..models import Spell, Component
@@ -75,11 +75,12 @@ def spell_list(request):
 def spell_detail(request, spell_id):
     spell = get_object_or_404(Spell, id=spell_id)
     components = Component.objects.filter(spell=spell)
-
+    similar_spells = SpellService.get_similar_spells(spell, limit=3)
     context = {
         'spell': spell,
         'components': components,
         'can_edit': request.user.is_staff or (request.user == spell.created_by and not spell.is_homebrew),
+        'similar_spells': similar_spells,
     }
     return render(request, 'DnDSite/spell_detail.html', context)
 

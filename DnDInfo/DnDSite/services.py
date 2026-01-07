@@ -1,7 +1,7 @@
 from django.db.models import Q
 from django.urls import reverse
 
-from .models import Monster, Equipment
+from .models import Monster, Equipment, Spell
 
 
 class MonsterService:
@@ -42,6 +42,35 @@ class SpellService:
     def get_absolute_url(spell):
         return reverse('spell_detail', args=[str(spell.id)])
 
+    @staticmethod
+    def get_similar_spells(spell, limit=5):
+        queries = Q()
+        queries |= Q(level=spell.level)
+        queries |= Q(school=spell.school)
+        name_words = [word for word in spell.name.split() if len(word) > 2]
+        for word in name_words[:3]:
+            queries |= Q(name__icontains=word)
+            queries |= Q(desc__icontains=word)
+
+        if spell.desc:
+            effect_keywords = [
+                'урон', 'лечение', 'щит', 'невидимость', 'полёт',
+                'телепортация', 'огонь', 'лёд', 'молния', 'кислота',
+                'яд', 'психический', 'сила', 'ловкость', 'интеллект'
+            ]
+            for keyword in effect_keywords:
+                if keyword in spell.desc.lower():
+                    queries |= Q(desc__icontains=keyword)
+
+        similar = Spell.objects.filter(queries).exclude(id=spell.id).distinct()
+        similar = similar.order_by(
+            '-level',
+            '-school',
+            'name'
+        )[:limit]
+
+        return similar
+
 
 class EquipmentService:
     @staticmethod
@@ -67,7 +96,6 @@ class EquipmentService:
 
 
 class FavoriteService:
-
     CONTENT_TYPE_MODELS = {
         'monster': 'Monster',
         'spell': 'Spell',
@@ -82,14 +110,16 @@ class FavoriteService:
 
     @staticmethod
     def get_object(favorite):
-        from django.apps import apps
-
-        model_name = FavoriteService.CONTENT_TYPE_MODELS.get(favorite.content_type)
-        if not model_name:
-            return None
-
-        model = apps.get_model('DnDSite', model_name)
-        return model.objects.filter(id=favorite.object_id).first()
+        if favorite.content_type == 'monster':
+            from .models import Monster
+            return Monster.objects.filter(id=favorite.object_id).first()
+        elif favorite.content_type == 'spell':
+            from .models import Spell
+            return Spell.objects.filter(id=favorite.object_id).first()
+        elif favorite.content_type == 'equipment':
+            from .models import Equipment
+            return Equipment.objects.filter(id=favorite.object_id).first()
+        return None
 
     @staticmethod
     def get_object_name(favorite):
