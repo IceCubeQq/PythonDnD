@@ -118,7 +118,11 @@ class Speed(models.Model):
 
 
 class Component(models.Model):
-    COMPONENT_TYPES = COMPONENT_TYPES
+    COMPONENT_TYPES = [
+        ('V', 'Вербальный'),
+        ('S', 'Соматический'),
+        ('M', 'Материальный'),
+    ]
     spell = models.ForeignKey('Spell', on_delete=models.CASCADE, related_name='components')
     type = models.CharField(max_length=1, choices=COMPONENT_TYPES)
 
@@ -130,7 +134,11 @@ class Component(models.Model):
 
 
 class Favorite(models.Model):
-    CONTENT_TYPES = CONTENT_TYPES
+    CONTENT_TYPES = [
+        ('monster', 'Монстр'),
+        ('spell', 'Заклинание'),
+        ('equipment', 'Снаряжение'),
+    ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites', verbose_name="Пользователь")
     content_type = models.CharField(max_length=20, choices=CONTENT_TYPES, verbose_name="Тип контента")

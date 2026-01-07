@@ -135,7 +135,11 @@ class MonsterForm(forms.ModelForm):
 
 class SpellForm(forms.ModelForm):
     components = forms.MultipleChoiceField(
-        choices=Component.COMPONENT_TYPES,
+        choices=[
+            ('V', 'Вербальный'),
+            ('S', 'Соматический'),
+            ('M', 'Материальный'),
+        ],
         widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
         required=False,
         label='Компоненты'
@@ -374,7 +378,11 @@ class MonsterEditForm(forms.ModelForm):
 
 class SpellEditForm(forms.ModelForm):
     components = forms.MultipleChoiceField(
-        choices=Component.COMPONENT_TYPES,
+        choices=[
+            ('V', 'Вербальный'),
+            ('S', 'Соматический'),
+            ('M', 'Материальный'),
+        ],
         widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
         required=False,
         label='Компоненты'
@@ -536,7 +544,11 @@ class MonsterSpeedsForm(forms.Form):
 
 class FavoriteForm(forms.Form):
     content_type = forms.ChoiceField(
-        choices=Favorite.CONTENT_TYPES,
+        choices=[
+            ('monster', 'Монстр'),
+            ('spell', 'Заклинание'),
+            ('equipment', 'Снаряжение'),
+        ],
         widget=forms.HiddenInput()
     )
     object_id = forms.IntegerField(
