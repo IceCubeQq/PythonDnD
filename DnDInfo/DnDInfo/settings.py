@@ -14,7 +14,8 @@ if not SECRET_KEY:
     raise ValueError(f"SECRET_KEY не установлен")
 
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+# ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['IceCubeQ.pythonanywhere.com', '127.0.0.1']
 pythonanywhere_domain = os.getenv('PYTHONANYWHERE_DOMAIN')
 if pythonanywhere_domain:
     ALLOWED_HOSTS.append(pythonanywhere_domain)
