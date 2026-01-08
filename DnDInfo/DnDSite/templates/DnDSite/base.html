@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru" data-bs-theme="auto">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -120,16 +120,6 @@
 
                 </ul>
                 <div class="d-flex align-items-center">
-                    <div class="input-group me-3 d-none d-lg-flex" style="max-width: 300px;">
-                        <input type="text" class="form-control form-control-sm"
-                               placeholder="Поиск..." id="globalSearch">
-                        <button class="btn btn-outline-light btn-sm"
-                                type="button"
-                                id="searchButton"
-                                data-search-url="{% url 'monster_list' %}">
-                            <i class="bi bi-search"></i>
-                        </button>
-                    </div>
                     <button class="btn btn-sm btn-outline-light me-3" id="themeToggle" title="Сменить тему">
                         <i class="bi bi-moon-fill" id="themeIcon"></i>
                     </button>
@@ -227,41 +217,39 @@
     {% block extra_js %}
     <script src="/static/js/base.js"></script>
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchButton = document.getElementById('searchButton');
-        const globalSearch = document.getElementById('globalSearch');
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    const html = document.documentElement;
 
-        if (!searchButton || !globalSearch) return;
-
-        function getSearchUrl() {
-            const currentPath = window.location.pathname;
-
-
-            if (currentPath.includes('/monsters') || currentPath === '/') {
-                return "{% url 'monster_list' %}";
-            } else if (currentPath.includes('/spells')) {
-                return "{% url 'spell_list' %}";
-            } else if (currentPath.includes('/equipment')) {
-                return "{% url 'equipment_list' %}";
-            }
-            return "{% url 'monster_list' %}";
+    function setTheme(theme) {
+        if (theme === 'dark') {
+            html.setAttribute('data-bs-theme', 'dark');
+            themeIcon.className = 'bi bi-sun-fill';
+            localStorage.setItem('theme', 'dark');
+        } else {
+            html.setAttribute('data-bs-theme', 'light');
+            themeIcon.className = 'bi bi-moon-fill';
+            localStorage.setItem('theme', 'light');
         }
+    }
 
-        function performSearch() {
-            const query = globalSearch.value.trim();
-            if (query) {
-                const searchUrl = getSearchUrl();
-                window.location.href = searchUrl + '?search=' + encodeURIComponent(query);
-            }
+    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    const savedTheme = localStorage.getItem('theme');
+
+    if (savedTheme) {
+        setTheme(savedTheme);
+    } else if (prefersDarkScheme.matches) {
+        setTheme('dark');
+    } else {
+        setTheme('light');
+    }
+
+    themeToggle.addEventListener('click', () => {
+        if (html.getAttribute('data-bs-theme') === 'dark') {
+            setTheme('light');
+        } else {
+            setTheme('dark');
         }
-
-        searchButton.addEventListener('click', performSearch);
-
-        globalSearch.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                performSearch();
-            }
-        });
     });
     </script>
     {% endblock %}

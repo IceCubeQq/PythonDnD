@@ -5,32 +5,64 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from ..services import MonsterService
 from ..constants import SORT_OPTIONS, TYPE_OPTIONS, SIZE_OPTIONS, SIZE_CHOICES, SPEED_EXAMPLES, SPEED_TYPES
-from ..forms import MonsterSpeedsForm, ArmorClassForm, MonsterForm, MonsterEditForm
+from ..forms import MonsterSpeedsForm, ArmorClassForm, MonsterForm, MonsterEditForm, SearchForm
 from ..models import Monster, Armor_class, Speed
 from .base_views import is_admin, calculate_modifier
 
 
 def monster_list(request):
+    search_query = request.GET.get('search', '').strip()
     show_homebrew = request.GET.get('show_homebrew', 'false') == 'true'
-
+    selected_size = request.GET.get('size', '')
+    selected_type = request.GET.get('type', '')
+    sort_by = request.GET.get('sort', 'name')
     if show_homebrew:
         monsters_list = Monster.objects.filter(is_homebrew=True, is_approved=True)
     else:
         monsters_list = Monster.objects.filter(is_homebrew=False)
+    if search_query:
+        from django.db.models import Q
+        search_terms = search_query.split()
+        query = Q()
 
-    search = request.GET.get('search', '')
-    if search:
-        monsters_list = monsters_list.filter(name__icontains=search)
+        for term in search_terms:
+            if term:
+                term_lower = term.lower()
+                term_upper = term.upper()
+                term_title = term.title()
 
-    size = request.GET.get('size', '')
-    if size:
-        monsters_list = monsters_list.filter(size=size)
+                query |= Q(name__icontains=term)
 
-    monster_type = request.GET.get('type', '')
-    if monster_type:
-        monsters_list = monsters_list.filter(type__icontains=monster_type)
+                query |= Q(name__icontains=term_lower)
+                query |= Q(name__icontains=term_upper)
+                query |= Q(name__icontains=term_title)
 
-    sort_by = request.GET.get('sort', 'name')
+                query |= Q(type__icontains=term)
+                query |= Q(type__icontains=term_lower)
+                query |= Q(type__icontains=term_upper)
+                query |= Q(type__icontains=term_title)
+        monsters_list = monsters_list.filter(query).distinct()
+        if monsters_list.count() == 0 and search_terms:
+            from django.db.models.functions import Lower
+            monsters_list_tmp = monsters_list.annotate(
+                name_lower=Lower('name'),
+                type_lower=Lower('type')
+            )
+
+            query_lower = Q()
+            for term in search_terms:
+                term_lower = term.lower()
+                query_lower |= Q(name_lower__icontains=term_lower)
+                query_lower |= Q(type_lower__icontains=term_lower)
+
+            monsters_list = monsters_list_tmp.filter(query_lower)
+
+    if selected_size:
+        monsters_list = monsters_list.filter(size=selected_size)
+
+    if selected_type:
+        monsters_list = monsters_list.filter(type__icontains=selected_type)
+
     if sort_by == 'hit_points':
         monsters_list = monsters_list.order_by('-hit_points')
     elif sort_by == 'strength':
@@ -49,8 +81,14 @@ def monster_list(request):
         monsters_list = monsters_list.order_by('name')
 
     size_options = SIZE_OPTIONS
+
     if show_homebrew:
-        raw_types = monsters_list.values_list('type', flat=True).distinct()
+        if show_homebrew:
+            base_query = Monster.objects.filter(is_homebrew=True, is_approved=True)
+        else:
+            base_query = Monster.objects.filter(is_homebrew=False)
+
+        raw_types = base_query.values_list('type', flat=True).distinct()
         cleaned_types = set()
         for type_name in raw_types:
             if type_name:
@@ -72,9 +110,9 @@ def monster_list(request):
         'page_obj': page_obj,
         'monsters': page_obj.object_list,
         'total_count': monsters_list.count(),
-        'search_query': search,
-        'selected_size': size,
-        'selected_type': monster_type,
+        'search_query': search_query,
+        'selected_size': selected_size,
+        'selected_type': selected_type,
         'sort_by': sort_by,
         'show_homebrew': show_homebrew,
         'size_options': size_options,

@@ -12,39 +12,74 @@ from .base_views import is_admin
 
 
 def spell_list(request):
+    search_query = request.GET.get('search', '').strip()
     show_homebrew = request.GET.get('show_homebrew', 'false') == 'true'
+    level_filter = request.GET.get('level', '')
+    school = request.GET.get('school', '')
+    sort_by = request.GET.get('sort', 'name')
 
     if show_homebrew:
         spells_list = Spell.objects.filter(is_homebrew=True, is_approved=True)
     else:
         spells_list = Spell.objects.filter(is_homebrew=False)
 
-    level_filter = request.GET.get('level')
-    school = request.GET.get('school', '')
-    sort_by = request.GET.get('sort', 'name')
-
     if level_filter and level_filter.isdigit():
         spells_list = spells_list.filter(level=int(level_filter))
 
-    search = request.GET.get('search', '')
-    if search:
-        spells_list = spells_list.filter(Q(name__icontains=search) | Q(desc__icontains=search))
+    if search_query:
+        search_terms = search_query.split()
+        query = Q()
+
+        for term in search_terms:
+            if term:
+                term_lower = term.lower()
+                term_upper = term.upper()
+                term_title = term.title()
+
+                query |= Q(name__icontains=term)
+
+                query |= Q(name__icontains=term_lower)
+                query |= Q(name__icontains=term_upper)
+                query |= Q(name__icontains=term_title)
+
+                query |= Q(desc__icontains=term)
+                query |= Q(desc__icontains=term_lower)
+                query |= Q(desc__icontains=term_upper)
+                query |= Q(desc__icontains=term_title)
+
+        spells_list = spells_list.filter(query).distinct()
+
+        if spells_list.count() == 0 and search_terms:
+            from django.db.models.functions import Lower
+            spells_list_tmp = spells_list.annotate(
+                name_lower=Lower('name'),
+                desc_lower=Lower('desc')
+            )
+
+            query_lower = Q()
+            for term in search_terms:
+                term_lower = term.lower()
+                query_lower |= Q(name_lower__icontains=term_lower)
+                query_lower |= Q(desc_lower__icontains=term_lower)
+
+            spells_list = spells_list_tmp.filter(query_lower)
 
     if school:
         spells_list = spells_list.filter(school=school)
 
-    if sort_by == 'name':
-        spells_list = spells_list.order_by('name')
-    elif sort_by == 'level':
+    if sort_by == 'level':
         spells_list = spells_list.order_by('level', 'name')
     elif sort_by == 'school':
         spells_list = spells_list.order_by('school', 'level', 'name')
+    else:
+        spells_list = spells_list.order_by('name')
 
     paginator = Paginator(spells_list, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     toggle_url = f"{request.path}?show_homebrew={'false' if show_homebrew else 'true'}"
+
     reset_url = request.path
     if show_homebrew:
         reset_url = f"{request.path}?show_homebrew=true"
@@ -55,7 +90,7 @@ def spell_list(request):
         'levels': range(0, 10),
         'selected_level': level_filter,
         'selected_school': school,
-        'search_query': search,
+        'search_query': search_query,
         'sort_by': sort_by,
         'show_homebrew': show_homebrew,
         'toggle_url': toggle_url,
@@ -64,7 +99,7 @@ def spell_list(request):
         'sort_options': SORT_OPTIONS_SPELLS,
         'filter_params': {
             'show_homebrew': show_homebrew,
-            'search': search,
+            'search': search_query,
             'level': level_filter,
             'school': school,
             'sort': sort_by,

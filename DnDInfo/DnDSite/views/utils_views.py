@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
-
-from ..models import Monster
+from django.db.models import Q
+from ..models import Monster, Equipment, Spell
 
 
 @require_GET
@@ -35,3 +35,4 @@ def monster_filter_api(request):
         'filters': {'size': size, 'type': monster_type},
         'monsters': data,
     })
+

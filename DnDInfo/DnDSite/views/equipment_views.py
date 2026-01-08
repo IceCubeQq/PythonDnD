@@ -1,5 +1,6 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from ..services import EquipmentService
@@ -17,13 +18,48 @@ def equipment_list(request):
     else:
         equipment_list = Equipment.objects.filter(is_homebrew=False)
 
-    search = request.GET.get('search', '')
+    search_query = request.GET.get('search', '').strip()
     cost_unit = request.GET.get('cost_unit', '')
     weight_filter = request.GET.get('weight_filter', '')
     sort_by = request.GET.get('sort', 'name')
 
-    if search:
-        equipment_list = equipment_list.filter(name__icontains=search)
+    if search_query:
+        search_terms = search_query.split()
+        query = Q()
+
+        for term in search_terms:
+            if term:
+                term_lower = term.lower()
+                term_upper = term.upper()
+                term_title = term.title()
+
+                query |= Q(name__icontains=term)
+
+                query |= Q(name__icontains=term_lower)
+                query |= Q(name__icontains=term_upper)
+                query |= Q(name__icontains=term_title)
+
+                query |= Q(description__icontains=term)
+                query |= Q(description__icontains=term_lower)
+                query |= Q(description__icontains=term_upper)
+                query |= Q(description__icontains=term_title)
+
+        equipment_list = equipment_list.filter(query).distinct()
+
+        if equipment_list.count() == 0 and search_terms:
+            from django.db.models.functions import Lower
+            equipment_list_tmp = equipment_list.annotate(
+                name_lower=Lower('name'),
+                description_lower=Lower('description')
+            )
+
+            query_lower = Q()
+            for term in search_terms:
+                term_lower = term.lower()
+                query_lower |= Q(name_lower__icontains=term_lower)
+                query_lower |= Q(description_lower__icontains=term_lower)
+
+            equipment_list = equipment_list_tmp.filter(query_lower)
 
     if cost_unit:
         equipment_list = equipment_list.filter(cost_unit=cost_unit)
@@ -66,7 +102,7 @@ def equipment_list(request):
         'page_obj': page_obj,
         'equipment': page_obj.object_list,
         'total_count': equipment_list.count(),
-        'search_query': search,
+        'search_query': search_query,
         'selected_cost_unit': cost_unit,
         'selected_weight_filter': weight_filter,
         'sort_by': sort_by,

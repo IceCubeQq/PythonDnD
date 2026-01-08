@@ -1,4 +1,7 @@
-from django.shortcuts import render
+from django.core.paginator import Paginator
+from django.db.models import Q
+from django.shortcuts import render, redirect
+from django.urls import reverse
 
 from ..models import Monster, Spell, Equipment
 
@@ -41,3 +44,4 @@ def index(request):
 
 def calculate_modifier(score):
     return (score - 10) // 2
+

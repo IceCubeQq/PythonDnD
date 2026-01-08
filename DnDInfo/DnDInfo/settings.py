@@ -14,7 +14,6 @@ if not SECRET_KEY:
     raise ValueError(f"SECRET_KEY не установлен")
 
 DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
-# ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 ALLOWED_HOSTS = ['IceCubeQ.pythonanywhere.com', '127.0.0.1']
 pythonanywhere_domain = os.getenv('PYTHONANYWHERE_DOMAIN')
 if pythonanywhere_domain:
@@ -108,6 +107,4 @@ DND_API_URL = os.getenv('DND_API_URL', 'https://www.dnd5eapi.co/api/2014')
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
-
 LOGOUT_REDIRECT_URL = '/'

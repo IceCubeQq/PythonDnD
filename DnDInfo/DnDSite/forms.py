@@ -3,7 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
-from .constants import SIZE_CHOICES, SPEED_EXAMPLES
+from .constants import SIZE_CHOICES, SPEED_EXAMPLES, TYPE_OPTIONS, SORT_OPTIONS
 from .models import Monster, Spell, Equipment, Armor_class, Speed, Component, Favorite
 
 
@@ -558,3 +558,16 @@ class FavoriteForm(forms.Form):
         max_length=10,
         widget=forms.HiddenInput()
     )
+
+class SearchForm(forms.Form):
+    search = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Поиск...'
+        })
+    )
+    show_homebrew = forms.BooleanField(required=False, initial=False)
+    size = forms.ChoiceField(choices=SIZE_CHOICES, required=False)
+    type = forms.ChoiceField(choices=TYPE_OPTIONS, required=False)
+    sort = forms.ChoiceField(choices=SORT_OPTIONS, required=False, initial='name')
