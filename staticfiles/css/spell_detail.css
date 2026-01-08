@@ -14,12 +14,13 @@
 }
 
 .border-bottom {
-    border-bottom: 2px solid #dee2e6 !important;
+    border-bottom: 2px solid var(--bs-border-color) !important;
 }
 
 .table th {
     width: 40%;
 }
+
 .favorite-btn.active {
     background-color: #ffc107;
     color: white;
