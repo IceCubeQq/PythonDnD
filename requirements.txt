@@ -1,4 +1,0 @@
-Django==4.2.7
-requests==2.32.5
-python-dotenv==1.2.1
-whitenoise==6.11.0
