@@ -47,7 +47,7 @@ class Spell(models.Model):
     duration = models.TextField("Продолжительность")
     casting_time = models.TextField("Время накладывания")
     level = models.IntegerField("Уровень")
-    school = models.CharField(max_length=20, choices=SCHOOL_CHOICES, verbose_name='Школа магии')
+    school = models.CharField(max_length=20, choices=SCHOOL_CHOICES_LIST, verbose_name='Школа магии')
     ritual = models.BooleanField("Ритуал", default=False)
     concentration = models.BooleanField("Концентрация", default=False)
     is_homebrew = models.BooleanField("Homebrew", default=False)
