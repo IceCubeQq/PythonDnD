@@ -1,10 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from ...utils import *
-from ...models import *
+from DnDSite.utils import DataImporter
 import logging
-
-
 
 logger = logging.getLogger(__name__)
 
@@ -17,24 +14,18 @@ class Command(BaseCommand):
             '--limit',
             type=int,
             default=20,
-            help='Количество записей каждого типа для загрузки'
-        )
-        parser.add_argument(
-            '--update-descriptions',
-            action='store_true',
-            help='Обновить описания существующих записей'
+            help='Количество записей каждого типа для загрузки (по умолчанию: 20)'
         )
 
     def handle(self, *args, **options):
         limit = options['limit']
-        update_descriptions = options['update_descriptions']
         importer = DataImporter()
 
         self.stdout.write(self.style.SUCCESS('Начинаем загрузку данных из D&D 5e API...'))
 
         try:
             with transaction.atomic():
-                self.stdout.write('Загрузка монстров')
+                self.stdout.write('Загрузка монстров...')
                 monsters = importer.api_client.get_monsters_list()[:limit]
                 monster_count = 0
 
@@ -45,7 +36,7 @@ class Command(BaseCommand):
 
                 self.stdout.write(self.style.SUCCESS(f'Загружено монстров: {monster_count}'))
 
-                self.stdout.write('Загрузка заклинаний')
+                self.stdout.write('Загрузка заклинаний...')
                 spells = importer.api_client.get_spells_list()[:limit]
                 spell_count = 0
 
@@ -56,7 +47,7 @@ class Command(BaseCommand):
 
                 self.stdout.write(self.style.SUCCESS(f'Загружено заклинаний: {spell_count}'))
 
-                self.stdout.write('Загрузка снаряжения')
+                self.stdout.write('Загрузка снаряжения...')
                 equipment_list = importer.api_client.get_equipment_list()[:limit]
                 equipment_count = 0
 
@@ -67,68 +58,14 @@ class Command(BaseCommand):
 
                 self.stdout.write(self.style.SUCCESS(f'Загружено снаряжения: {equipment_count}'))
 
+                self.stdout.write(self.style.SUCCESS('\n' + '=' * 50))
+                self.stdout.write(self.style.SUCCESS('ИТОГ ЗАГРУЗКИ:'))
                 self.stdout.write(self.style.SUCCESS(f'Монстров: {monster_count}'))
                 self.stdout.write(self.style.SUCCESS(f'Заклинаний: {spell_count}'))
                 self.stdout.write(self.style.SUCCESS(f'Снаряжения: {equipment_count}'))
                 self.stdout.write(self.style.SUCCESS(f'Всего записей: {monster_count + spell_count + equipment_count}'))
-
-                if update_descriptions:
-                    self.stdout.write('Обновление описаний существующих записей')
-                    self.update_existing_descriptions(importer, limit)
+                self.stdout.write(self.style.SUCCESS('=' * 50))
 
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'Ошибка при загрузке данных: {e}'))
             logger.error(f'Ошибка при загрузке данных: {e}')
-
-    def update_existing_descriptions(self, importer, limit):
-        equipment_without_description = Equipment.objects.filter(is_homebrew=False).filter(
-            models.Q(description__isnull=True) | models.Q(description='')
-        )[:limit]
-
-        total_count = equipment_without_description.count()
-        updated_count = 0
-        skipped_count = 0
-
-        self.stdout.write(f'Найдено {total_count} предметов без описания')
-
-        if total_count == 0:
-            self.stdout.write(self.style.WARNING('Нет предметов для обновления описаний'))
-            return
-
-        for i, equipment in enumerate(equipment_without_description, 1):
-            try:
-                self.stdout.write(f'[{i}/{total_count}] Обработка: {equipment.name}')
-                equipment_list = importer.api_client.get_equipment_list()
-                found = False
-
-                for item in equipment_list:
-                    if item['name'].lower() == equipment.name.lower():
-                        updated_equipment = importer.import_equipment(item['index'])
-                        if updated_equipment and updated_equipment.description:
-                            updated_count += 1
-                            self.stdout.write(
-                                self.style.SUCCESS(f'Обновлено описание')
-                            )
-                        else:
-                            skipped_count += 1
-                            self.stdout.write(
-                                self.style.WARNING(f'Не удалось получить описание из API')
-                            )
-                        found = True
-                        break
-
-                if not found:
-                    skipped_count += 1
-                    self.stdout.write(
-                        self.style.WARNING(f'Не найдено в API')
-                    )
-
-            except Exception as e:
-                logger.error(f"Ошибка при обновлении {equipment.name}: {e}")
-                self.stdout.write(
-                    self.style.ERROR(f'  ✗ Ошибка: {str(e)[:50]}...')
-                )
-                skipped_count += 1
-        self.stdout.write(self.style.SUCCESS(f'Обработано: {total_count}'))
-        self.stdout.write(self.style.SUCCESS(f'Обновлено: {updated_count}'))
-        self.stdout.write(self.style.WARNING(f'Пропущено: {skipped_count}'))
