@@ -1,0 +1,366 @@
+{% extends "DnDSite/base.html" %}
+{% load dnd_filters %}
+
+{% block content %}
+<div class="container">
+    <div class="jumbotron bg-dark text-white p-5 rounded mb-5">
+        <h1 class="display-4">Добро пожаловать в D&D Справочник!</h1>
+        <p class="lead">Быстрый доступ к официальному и пользовательскому контенту</p>
+        <hr class="my-4 bg-light">
+        <div class="row">
+            <div class="col-md-4">
+                <h2>{{ monster_count }}</h2>
+                <p>Монстров</p>
+            </div>
+            <div class="col-md-4">
+                <h2>{{ spell_count }}</h2>
+                <p>Заклинаний</p>
+            </div>
+            <div class="col-md-4">
+                <h2>{{ equipment_count }}</h2>
+                <p>Предметов снаряжения</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-5">
+        <div class="card-header bg-primary text-white">
+            <h3><i class="bi bi-check-circle"></i> Официальный контент</h3>
+            <small class="text-light">Данные из D&D 5e API</small>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h4><i class="bi bi-shield-fill"></i> Монстры</h4>
+                    <ul class="list-group">
+                        {% for monster in official_monsters %}
+                        <li class="list-group-item">
+                            <a href="{% url 'monster_detail' monster.id %}">{{ monster.name }}</a>
+                            <span class="badge bg-danger float-end">{{ monster.hit_points }} HP</span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-muted">Нет монстров</li>
+                        {% endfor %}
+                    </ul>
+                    <a href="{% url 'monster_list' %}" class="btn btn-primary mt-3 w-100">Все официальные монстры</a>
+                </div>
+
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h4><i class="bi bi-stars text-warning"></i> Заклинания</h4>
+                    <ul class="list-group">
+                        {% for spell in official_spells %}
+                        <li class="list-group-item">
+                            <a href="{% url 'spell_detail' spell.id %}">{{ spell.name }}</a>
+                            <span class="badge
+                                {% if spell.level == 0 %}bg-secondary
+                                {% elif spell.level == 1 %}bg-primary
+                                {% elif spell.level == 2 %}bg-success
+                                {% elif spell.level == 3 %}bg-warning text-dark
+                                {% elif spell.level == 4 %}bg-danger
+                                {% else %}bg-info{% endif %} float-end">
+                                {% if spell.level == 0 %}Заговор{% else %}{{ spell.level }} ур.{% endif %}
+                            </span>
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-muted">Нет заклинаний</li>
+                        {% endfor %}
+                    </ul>
+                    <a href="{% url 'spell_list' %}" class="btn btn-primary mt-3 w-100">Все официальные заклинания</a>
+                </div>
+
+                <div class="col-md-4">
+                    <h4><i class="bi bi-backpack"></i> Снаряжение</h4>
+                    <ul class="list-group">
+                        {% for item in official_equipment %}
+                        <li class="list-group-item">
+                            <a href="{% url 'equipment_detail' item.id %}">{{ item.name }}</a>
+                            {% if item.cost_quantity %}
+                            <span class="badge
+                                {% if item.cost_unit == 'cp' %}bg-light text-dark
+                                {% elif item.cost_unit == 'sp' %}bg-secondary
+                                {% elif item.cost_unit == 'ep' %}bg-warning text-dark
+                                {% elif item.cost_unit == 'gp' %}bg-warning
+                                {% else %}bg-info{% endif %} float-end">
+                                {{ item.cost_quantity }} {{ item.get_cost_unit_display|slice:":1" }}
+                            </span>
+                            {% else %}
+                            <span class="badge bg-success float-end">Бесплатно</span>
+                            {% endif %}
+                        </li>
+                        {% empty %}
+                        <li class="list-group-item text-muted">Нет снаряжения</li>
+                        {% endfor %}
+                    </ul>
+                    <a href="{% url 'equipment_list' %}" class="btn btn-primary mt-3 w-100">Все официальное снаряжение</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-5">
+        <div class="card-header bg-success text-white">
+            <h3><i class="bi bi-stars"></i> Homebrew</h3>
+            <small class="text-light">Пользовательский контент, одобренный администраторами</small>
+        </div>
+        <div class="card-body">
+            {% if homebrew_monsters or homebrew_spells or homebrew_equipment %}
+            <div class="row">
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h4><i class="bi bi-dragon text-danger"></i> Монстры</h4>
+                    {% if homebrew_monsters %}
+                    <ul class="list-group">
+                        {% for monster in homebrew_monsters %}
+                        <li class="list-group-item">
+                            <a href="{% url 'monster_detail' monster.id %}">{{ monster.name }}</a>
+                            <span class="badge bg-danger float-end">{{ monster.hit_points }} HP</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted">Пока нет одобренных монстров</p>
+                    {% endif %}
+                    <a href="{% url 'monster_list' %}?show_homebrew=true" class="btn btn-success mt-3 w-100">Все Homebrew монстры</a>
+                </div>
+
+                <div class="col-md-4 mb-4 mb-md-0">
+                    <h4><i class="bi bi-stars text-warning"></i> Заклинания</h4>
+                    {% if homebrew_spells %}
+                    <ul class="list-group">
+                        {% for spell in homebrew_spells %}
+                        <li class="list-group-item">
+                            <a href="{% url 'spell_detail' spell.id %}">{{ spell.name }}</a>
+                            <span class="badge
+                                {% if spell.level == 0 %}bg-secondary
+                                {% elif spell.level == 1 %}bg-primary
+                                {% elif spell.level == 2 %}bg-success
+                                {% elif spell.level == 3 %}bg-warning text-dark
+                                {% elif spell.level == 4 %}bg-danger
+                                {% else %}bg-info{% endif %} float-end">
+                                {% if spell.level == 0 %}Заговор{% else %}{{ spell.level }} ур.{% endif %}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted">Пока нет одобренных заклинаний</p>
+                    {% endif %}
+                    <a href="{% url 'spell_list' %}?show_homebrew=true" class="btn btn-success mt-3 w-100">Все Homebrew заклинания</a>
+                </div>
+
+                <div class="col-md-4">
+                    <h4><i class="bi bi-backpack"></i> Снаряжение</h4>
+                    {% if homebrew_equipment %}
+                    <ul class="list-group">
+                        {% for item in homebrew_equipment %}
+                        <li class="list-group-item">
+                            <a href="{% url 'equipment_detail' item.id %}">{{ item.name }}</a>
+                            {% if item.cost_quantity %}
+                            <span class="badge
+                                {% if item.cost_unit == 'cp' %}bg-light text-dark
+                                {% elif item.cost_unit == 'sp' %}bg-secondary
+                                {% elif item.cost_unit == 'ep' %}bg-warning text-dark
+                                {% elif item.cost_unit == 'gp' %}bg-warning
+                                {% else %}bg-info{% endif %} float-end">
+                                {{ item.cost_quantity }} {{ item.get_cost_unit_display|slice:":1" }}
+                            </span>
+                            {% else %}
+                            <span class="badge bg-success float-end">Бесплатно</span>
+                            {% endif %}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% else %}
+                    <p class="text-muted">Пока нет одобренного снаряжения</p>
+                    {% endif %}
+                    <a href="{% url 'equipment_list' %}?show_homebrew=true" class="btn btn-success mt-3 w-100">Все Homebrew снаряжение</a>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-4">
+                <div class="display-1 text-muted mb-3">
+                    <i class="bi bi-stars"></i>
+                </div>
+                <h4 class="text-muted">Пока нет одобренного homebrew контента</h4>
+                <p class="lead">Будьте первым, кто добавит свой контент!</p>
+                <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
+                    <a href="{% url 'add_monster' %}" class="btn btn-success mb-2">
+                        <i class="bi bi-plus-circle"></i> Добавить монстра
+                    </a>
+                    <a href="{% url 'add_spell' %}" class="btn btn-success mb-2">
+                        <i class="bi bi-plus-circle"></i> Добавить заклинание
+                    </a>
+                    <a href="{% url 'add_equipment' %}" class="btn btn-success mb-2">
+                        <i class="bi bi-plus-circle"></i> Добавить снаряжение
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header bg-warning">
+            <h3><i class="bi bi-tools"></i> Управление контентом</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                {% if request.user.is_staff %}
+                <div class="col-md-6 mb-4 mb-md-0">
+                    <div class="card border-warning h-100">
+                        <div class="card-body">
+                            <h5><i class="bi bi-shield-check text-warning"></i> Модерация</h5>
+                            <div class="mb-3">
+                                <strong>Ожидают проверки:</strong>
+                                <ul class="mb-0">
+                                    <li class="d-flex gap-2 mb-2 align-items-center">
+                                        <span>Монстры:</span>
+                                        <span class="badge bg-warning">{{ pending_monsters_count }}</span>
+                                    </li>
+                                    <li class="d-flex gap-2 mb-2 align-items-center">
+                                        <span>Заклинания:</span>
+                                        <span class="badge bg-warning">{{ pending_spells_count }}</span>
+                                    </li>
+                                    <li class="d-flex gap-2 mb-2 align-items-center">
+                                        <span>Снаряжение:</span>
+                                        <span class="badge bg-warning">{{ pending_equipment_count }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="mt-auto">
+                                <a href="{% url 'admin_panel' %}" class="btn btn-warning w-100">
+                                    <i class="bi bi-shield-check"></i> Панель модерации
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100 border-primary">
+                        <div class="card-body d-flex flex-column">
+                            <h4><i class="bi bi-plus-circle text-primary"></i> Добавить контент</h4>
+                            <p class="text-muted flex-grow-1">Создайте собственных монстров, заклинания и снаряжение</p>
+                            <div class="d-grid gap-2 mt-3">
+                                <a href="{% url 'add_monster' %}" class="btn btn-outline-primary">
+                                    <i class="bi bi-shield-fill"></i> Добавить монстра
+                                </a>
+                                <a href="{% url 'add_spell' %}" class="btn btn-outline-primary">
+                                    <i class="bi bi-stars"></i> Добавить заклинание
+                                </a>
+                                <a href="{% url 'add_equipment' %}" class="btn btn-outline-primary">
+                                    <i class="bi bi-backpack"></i> Добавить снаряжение
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12 d-flex justify-content-center">
+                    <div class="col-md-8 col-lg-6">
+                        <div class="card h-100 border-primary">
+                            <div class="card-body d-flex flex-column">
+                                <h4 class="text-center"><i class="bi bi-plus-circle text-primary"></i> Добавить свой контент</h4>
+                                <p class="text-muted text-center flex-grow-1">Создайте собственных монстров, заклинания и снаряжение для вашей кампании</p>
+                                <div class="d-grid gap-2 mt-3">
+                                    {% if user.is_authenticated %}
+                                    <a href="{% url 'add_monster' %}" class="btn btn-outline-primary">
+                                        <i class="bi bi-shield-fill"></i> Добавить монстра
+                                    </a>
+                                    <a href="{% url 'add_spell' %}" class="btn btn-outline-primary">
+                                        <i class="bi bi-stars"></i> Добавить заклинание
+                                    </a>
+                                    <a href="{% url 'add_equipment' %}" class="btn btn-outline-primary">
+                                        <i class="bi bi-backpack"></i> Добавить снаряжение
+                                    </a>
+                                    {% else %}
+                                    <div class="alert alert-info text-center">
+                                        <i class="bi bi-info-circle"></i>
+                                        Войдите в систему, чтобы добавлять свой контент
+                                    </div>
+                                    <div class="d-grid gap-2">
+                                        <a href="{% url 'login' %}" class="btn btn-primary">
+                                            <i class="bi bi-box-arrow-in-right"></i> Войти
+                                        </a>
+                                        <a href="{% url 'register' %}" class="btn btn-outline-primary">
+                                            <i class="bi bi-person-plus"></i> Зарегистрироваться
+                                        </a>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .list-group-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1.25rem;
+    }
+
+    .list-group-item a {
+        text-decoration: none;
+        color: #212529;
+        font-weight: 500;
+    }
+
+    .list-group-item a:hover {
+        color: #0d6efd;
+    }
+
+    .badge {
+        font-size: 0.75em;
+        padding: 0.35em 0.65em;
+    }
+
+    h4 {
+        color: #495057;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    @media (max-width: 768px) {
+        .col-md-4.mb-4 {
+            margin-bottom: 2rem !important;
+        }
+
+        .card.mb-5 {
+            margin-bottom: 3rem !important;
+        }
+
+        .card-body {
+            padding: 1.5rem !important;
+        }
+
+        .list-group-item {
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .card-header {
+            padding: 1rem 1.5rem;
+        }
+
+        .jumbotron {
+            padding: 2rem !important;
+            margin-bottom: 2rem !important;
+        }
+
+        .card.border-warning, .card.border-primary {
+            margin-bottom: 1.5rem !important;
+        }
+    }
+</style>
+{% endblock %}

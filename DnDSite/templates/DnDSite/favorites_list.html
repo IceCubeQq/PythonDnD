@@ -1,0 +1,366 @@
+{% extends "DnDSite/base.html" %}
+{% load dnd_filters %}
+
+{% block title %}Избранное - D&D Справочник{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5 fw-bold">
+                <i class="bi bi-star-fill text-warning"></i> Избранное
+            </h1>
+            <p class="lead text-muted">
+                Ваши сохранённые монстры, заклинания и снаряжение
+                <span class="badge bg-primary ms-2">{{ total_count }} элементов</span>
+            </p>
+        </div>
+    </div>
+
+    {% if total_count == 0 %}
+    <div class="card text-center py-5">
+        <div class="card-body">
+            <i class="bi bi-star text-muted" style="font-size: 4rem;"></i>
+            <h3 class="mt-4">Избранное пусто</h3>
+            <p class="text-muted">Добавляйте монстров, заклинания и снаряжение в избранное, чтобы быстро к ним вернуться</p>
+            <a href="{% url 'monster_list' %}" class="btn btn-primary">
+                <i class="bi bi-search"></i> Найти монстров
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <div class="nav-scroller mb-4" style="overflow-y: hidden;">
+        <ul class="nav nav-tabs flex-nowrap" id="favoritesTabs" role="tablist">
+            <li class="nav-item flex-shrink-0" role="presentation">
+                <button class="nav-link active" id="monsters-tab" data-bs-toggle="tab"
+                        data-bs-target="#monsters" type="button" role="tab">
+                    <i class="bi bi-shield-fill"></i> <span class="d-none d-md-inline">Монстры</span>
+                    <span class="badge bg-primary ms-1">{{ monsters|length }}</span>
+                </button>
+            </li>
+            <li class="nav-item flex-shrink-0" role="presentation">
+                <button class="nav-link" id="spells-tab" data-bs-toggle="tab"
+                        data-bs-target="#spells" type="button" role="tab">
+                    <i class="bi bi-stars"></i> <span class="d-none d-md-inline">Заклинания</span>
+                    <span class="badge bg-primary ms-1">{{ spells|length }}</span>
+                </button>
+            </li>
+            <li class="nav-item flex-shrink-0" role="presentation">
+                <button class="nav-link" id="equipment-tab" data-bs-toggle="tab"
+                        data-bs-target="#equipment" type="button" role="tab">
+                    <i class="bi bi-backpack"></i> <span class="d-none d-md-inline">Снаряжение</span>
+                    <span class="badge bg-primary ms-1">{{ equipment_items|length }}</span>
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <div class="tab-content" id="favoritesTabsContent">
+        <div class="tab-pane fade show active" id="monsters" role="tabpanel">
+            {% if monsters %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for monster in monsters %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">{{ monster.name }}</h5>
+                                <button class="btn btn-sm btn-outline-warning favorite-btn"
+                                        data-type="monster"
+                                        data-id="{{ monster.id }}"
+                                        data-action="remove"
+                                        title="Удалить из избранного">
+                                    <i class="bi bi-star-fill"></i>
+                                </button>
+                            </div>
+                            <div class="mb-3">
+                                <span class="badge bg-primary">{{ monster.size }}</span>
+                                <span class="badge bg-success">{{ monster.type }}</span>
+                                <span class="badge bg-danger">{{ monster.hit_points }} HP</span>
+                            </div>
+                            <a href="{% url 'monster_detail' monster.id %}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-eye"></i> Подробнее
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center py-4">
+                <i class="bi bi-dragon"></i> Нет монстров в избранном
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="tab-pane fade" id="spells" role="tabpanel">
+            {% if spells %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for spell in spells %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm spell-card spell-level-{{ spell.level }}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">{{ spell.name }}</h5>
+                                <button class="btn btn-sm btn-outline-warning favorite-btn"
+                                        data-type="spell"
+                                        data-id="{{ spell.id }}"
+                                        data-action="remove"
+                                        title="Удалить из избранного">
+                                    <i class="bi bi-star-fill"></i>
+                                </button>
+                            </div>
+                            <div class="mb-3">
+                                <span class="badge bg-info">{{ spell.get_school_display }}</span>
+                                <span class="badge {% if spell.level == 0 %}bg-secondary{% else %}bg-primary{% endif %}">
+                                    {{ spell.level|spell_level_display }}
+                                </span>
+
+                                {% if spell.ritual %}
+                                <span class="badge bg-warning text-dark">Ритуал</span>
+                                {% endif %}
+                            </div>
+                            <a href="{% url 'spell_detail' spell.id %}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-eye"></i> Подробнее
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center py-4">
+                <i class="bi bi-stars"></i> Нет заклинаний в избранном
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="tab-pane fade" id="equipment" role="tabpanel">
+            {% if equipment_items %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for item in equipment_items %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="card-title mb-0">{{ item.name }}</h5>
+                                <button class="btn btn-sm btn-outline-warning favorite-btn"
+                                        data-type="equipment"
+                                        data-id="{{ item.id }}"
+                                        data-action="remove"
+                                        title="Удалить из избранного">
+                                    <i class="bi bi-star-fill"></i>
+                                </button>
+                            </div>
+                            <div class="mb-3">
+                                {% if item.weight %}
+                                <span class="badge bg-light text-dark">
+                                    <i class="bi bi-weight"></i> {{ item.weight }} фн.
+                                </span>
+                                {% endif %}
+                                {% if item.cost_quantity %}
+                                <span class="badge bg-warning">
+                                    {{ item.cost_quantity }} {{ item.get_cost_unit_display }}
+                                </span>
+                                {% endif %}
+                            </div>
+                            <a href="{% url 'equipment_detail' item.id %}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-eye"></i> Подробнее
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info text-center py-4">
+                <i class="bi bi-bag"></i> Нет снаряжения в избранном
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.favorite-btn:hover {
+    background-color: #ffc107;
+    color: white;
+}
+
+.spell-card {
+    border-left: 4px solid;
+}
+
+.spell-level-0 { border-color: #6c757d; }
+.spell-level-1 { border-color: #007bff; }
+.spell-level-2 { border-color: #28a745; }
+.spell-level-3 { border-color: #ffc107; }
+.spell-level-4 { border-color: #fd7e14; }
+.spell-level-5 { border-color: #dc3545; }
+.spell-level-6 { border-color: #6f42c1; }
+.spell-level-7 { border-color: #e83e8c; }
+.spell-level-8 { border-color: #20c997; }
+.spell-level-9 { border-color: #17a2b8; }
+
+@media (max-width: 767.98px) {
+
+    .list-group-item {
+        border-radius: 0.375rem !important;
+        margin-bottom: 0.5rem;
+        border: 1px solid rgba(0, 0, 0, 0.125);
+    }
+
+    .list-group-item.active {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+        color: white;
+    }
+
+    .list-group-item.active .badge {
+        background-color: white !important;
+        color: #0d6efd !important;
+    }
+
+    .container.py-4 {
+        padding-top: 1.5rem !important;
+        padding-bottom: 2rem !important;
+    }
+
+    .g-4 {
+        gap: 1rem !important;
+    }
+
+    .col {
+        margin-bottom: 1rem;
+    }
+
+    .btn {
+        padding: 0.5rem 1rem;
+    }
+
+    .display-5 {
+        font-size: 2rem;
+    }
+
+    .lead {
+        font-size: 1.1rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .nav-tabs .nav-link {
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .nav-tabs .badge {
+        font-size: 0.8em;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.favorite-btn')) {
+            const btn = e.target.closest('.favorite-btn');
+            const contentType = btn.dataset.type;
+            const objectId = btn.dataset.id;
+            const action = btn.dataset.action;
+
+            toggleFavorite(contentType, objectId, action, btn);
+        }
+    });
+
+    function toggleFavorite(contentType, objectId, action, btn) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        btn.disabled = true;
+
+        fetch('/favorites/toggle/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `content_type=${contentType}&object_id=${objectId}&action=${action}&csrfmiddlewaretoken=${csrfToken}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (action === 'remove') {
+                    const card = btn.closest('.col');
+                    if (card) {
+                        card.remove();
+                        updateCounters(contentType);
+                        showToast('success', data.message);
+                    }
+                }
+            } else {
+                showToast('error', data.message || 'Ошибка');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('error', 'Ошибка сети');
+        })
+        .finally(() => {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        });
+    }
+
+    function updateCounters(contentType) {
+        const mobileTab = document.querySelector(`#mobile-${contentType}s-tab .badge`);
+        const desktopTab = document.querySelector(`#desktop-${contentType}s-tab .badge`);
+        const originalTab = document.querySelector(`#${contentType}s-tab .badge`);
+
+        const tabs = [mobileTab, desktopTab, originalTab].filter(tab => tab !== null);
+
+        tabs.forEach(tab => {
+            const current = parseInt(tab.textContent) || 0;
+            tab.textContent = Math.max(0, current - 1);
+        });
+
+        const totalBadge = document.querySelector('.lead .badge');
+        if (totalBadge) {
+            const current = parseInt(totalBadge.textContent) || 0;
+            totalBadge.textContent = Math.max(0, current - 1);
+        }
+    }
+
+    function showToast(type, message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 end-0 m-3`;
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
+    }
+
+    const tabTriggers = document.querySelectorAll('[data-bs-toggle="list"], [data-bs-toggle="tab"]');
+    tabTriggers.forEach(trigger => {
+        trigger.addEventListener('shown.bs.tab', function(event) {
+            const targetId = event.target.getAttribute('data-bs-target') ||
+                            event.target.getAttribute('href');
+
+            const allTriggers = document.querySelectorAll(`[data-bs-target="${targetId}"], [href="${targetId}"]`);
+            allTriggers.forEach(t => {
+                const tab = new bootstrap.Tab(t);
+                if (!t.classList.contains('active')) {
+                    tab.show();
+                }
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

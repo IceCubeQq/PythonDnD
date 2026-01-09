@@ -1,0 +1,59 @@
+.card {
+    transition: transform 0.2s;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.badge {
+    font-weight: 500;
+}
+
+.border-bottom {
+    border-bottom: 2px solid var(--bs-border-color) !important;
+}
+
+.list-group-item {
+    border-left: none;
+    border-right: none;
+}
+
+.table th {
+    background-color: var(--bs-light);
+}
+
+.display-6 {
+    font-size: 2.5rem;
+}
+
+@media (max-width: 768px) {
+    .display-6 {
+        font-size: 2rem;
+    }
+
+    .card-header {
+        font-size: 0.9rem;
+    }
+}
+
+.favorite-btn.active {
+    background-color: #ffc107;
+    color: white;
+}
+
+.favorite-btn.active:hover {
+    background-color: #e0a800;
+}
+
+@keyframes starPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.favorite-btn.active i {
+    animation: starPulse 0.3s ease-in-out;
+}

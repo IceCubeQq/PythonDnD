@@ -1,0 +1,824 @@
+{% extends "DnDSite/base.html" %}
+{% load static %}
+
+{% block title %}Панель модерации - D&D Справочник{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
+{% endblock %}
+
+
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h1 class="display-5 fw-bold text-center">
+                <i class="bi bi-shield-check text-warning"></i> Панель модерации
+            </h1>
+            <p class="lead text-muted text-center">Управление пользовательским контентом</p>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-4 mb-3">
+            <div class="card border-warning shadow">
+                <div class="card-body text-center">
+                    <h2 class="display-4 fw-bold text-warning">{{ stats.total_pending }}</h2>
+                    <h5 class="card-title">Ожидают проверки</h5>
+                    <div class="small text-muted">
+                        <span class="badge bg-secondary">Монстры: {{ stats.monsters_pending }}</span>
+                        <span class="badge bg-secondary">Заклинания: {{ stats.spells_pending }}</span>
+                        <span class="badge bg-secondary">Снаряжение: {{ stats.equipment_pending }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card border-success shadow">
+                <div class="card-body text-center">
+                    <h2 class="display-4 fw-bold text-success">{{ stats.total_approved }}</h2>
+                    <h5 class="card-title">Одобрено</h5>
+                    <p class="text-muted mb-0">Контент доступный всем пользователям</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs mb-4 justify-content-center" id="moderationTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="monsters-tab" data-bs-toggle="tab"
+                    data-bs-target="#monsters" type="button" role="tab">
+                <i class="bi bi-dragon"></i> Монстры
+                <span class="badge bg-danger ms-1">{{ pending_monsters.count }}</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="spells-tab" data-bs-toggle="tab"
+                    data-bs-target="#spells" type="button" role="tab">
+                <i class="bi bi-stars"></i> Заклинания
+                <span class="badge bg-danger ms-1">{{ pending_spells.count }}</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="equipment-tab" data-bs-toggle="tab"
+                    data-bs-target="#equipment" type="button" role="tab">
+                <i class="bi bi-bag"></i> Снаряжение
+                <span class="badge bg-danger ms-1">{{ pending_equipment.count }}</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="approved-tab" data-bs-toggle="tab"
+                    data-bs-target="#approved" type="button" role="tab">
+                <i class="bi bi-check-circle"></i> Недавно одобренные
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="moderationTabsContent">
+        <div class="tab-pane fade show active" id="monsters" role="tabpanel">
+            {% if pending_monsters %}
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-center w-100">
+                        <i class="bi bi-dragon"></i> Монстры на модерации
+                        <span class="badge bg-danger ms-2">{{ pending_monsters.count }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'moderate_bulk' %}" id="monstersForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="content_type" value="monster">
+
+                        <div class="table-responsive">
+                            <table class="table table-hover text-center align-middle">
+                                <thead>
+                                    <tr>
+                                        <th width="40" class="text-center">
+                                            <input type="checkbox" id="checkAllMonsters">
+                                        </th>
+                                        <th>Название</th>
+                                        <th>Размер / Тип</th>
+                                        <th>Характеристики</th>
+                                        <th>Автор</th>
+                                        <th>Дата создания</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for monster in pending_monsters %}
+                                    <tr>
+                                        <td class="text-center">
+                                            <input type="checkbox" name="selected_items"
+                                                   value="{{ monster.id }}" class="monster-checkbox">
+                                        </td>
+                                        <td>
+                                            <strong>{{ monster.name }}</strong>
+                                            <div class="small text-muted">
+                                                HP: {{ monster.hit_points }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ monster.size }}</span>
+                                            <span class="badge bg-secondary">{{ monster.type }}</span>
+                                        </td>
+                                        <td>
+                                            <small>
+                                                СИЛ: {{ monster.strength }} |
+                                                ЛОВ: {{ monster.dexterity }} |
+                                                ТЕЛ: {{ monster.constitution }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            {% if monster.created_by %}
+                                            <span class="badge bg-info">
+                                                {{ monster.created_by.username }}
+                                            </span>
+                                            {% else %}
+                                            <span class="text-muted">Не указан</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small>{{ monster.created_at|date:"d.m.Y H:i" }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm justify-content-center" role="group">
+                                                <a href="{% url 'monster_detail' monster.id %}"
+                                                   class="btn btn-outline-primary" target="_blank">
+                                                    <i class="bi bi-eye"></i> Просмотр
+                                                </a>
+                                                <button type="button" class="btn btn-outline-success approve-btn"
+                                                        data-type="monster" data-id="{{ monster.id }}">
+                                                    <i class="bi bi-check-lg"></i> Одобрить
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger reject-btn"
+                                                        data-type="monster" data-id="{{ monster.id }}">
+                                                    <i class="bi bi-x-lg"></i> Отклонить
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="card-footer bg-light">
+                            <div class="d-flex justify-content-center align-items-center">
+                                <div class="me-3">
+                                    <small class="text-muted">
+                                        Выбрано: <span id="selectedCountMonsters">0</span> из {{ pending_monsters.count }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center">
+                <i class="bi bi-check-circle"></i> Все монстры проверены!
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="tab-pane fade" id="spells" role="tabpanel">
+            {% if pending_spells %}
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-center w-100">
+                        <i class="bi bi-stars"></i> Заклинания на модерации
+                        <span class="badge bg-danger ms-2">{{ pending_spells.count }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'moderate_bulk' %}" id="spellsForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="content_type" value="spell">
+
+                        <div class="table-responsive">
+                            <table class="table table-hover text-center align-middle">
+                                <thead>
+                                    <tr>
+                                        <th width="40" class="text-center">
+                                            <input type="checkbox" id="checkAllSpells">
+                                        </th>
+                                        <th>Название</th>
+                                        <th>Уровень / Школа</th>
+                                        <th>Описание</th>
+                                        <th>Автор</th>
+                                        <th>Дата создания</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for spell in pending_spells %}
+                                    <tr>
+                                        <td class="text-center">
+                                            <input type="checkbox" name="selected_items"
+                                                   value="{{ spell.id }}" class="spell-checkbox">
+                                        </td>
+                                        <td>
+                                            <strong>{{ spell.name }}</strong>
+                                            <div class="small text-muted">
+                                                Время: {{ spell.casting_time }}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if spell.level == 0 %}bg-secondary{% else %}bg-primary{% endif %}">
+                                                {% if spell.level == 0 %}Заговор{% else %}{{ spell.level }} ур.{% endif %}
+                                            </span>
+                                            <span class="badge bg-info">{{ spell.get_school_display }}</span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {{ spell.desc|truncatechars:100 }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            {% if spell.created_by %}
+                                            <span class="badge bg-info">
+                                                {{ spell.created_by.username }}
+                                            </span>
+                                            {% else %}
+                                            <span class="text-muted">Не указан</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small>{{ spell.created_at|date:"d.m.Y H:i" }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm justify-content-center" role="group">
+                                                <a href="{% url 'spell_detail' spell.id %}"
+                                                   class="btn btn-outline-primary" target="_blank">
+                                                    <i class="bi bi-eye"></i> Просмотр
+                                                </a>
+                                                <button type="button" class="btn btn-outline-success approve-btn"
+                                                        data-type="spell" data-id="{{ spell.id }}">
+                                                    <i class="bi bi-check-lg"></i> Одобрить
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger reject-btn"
+                                                        data-type="spell" data-id="{{ spell.id }}">
+                                                    <i class="bi bi-x-lg"></i> Отклонить
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="card-footer bg-light">
+                            <div class="d-flex justify-content-center align-items-center">
+                                <div class="me-3">
+                                    <small class="text-muted">
+                                        Выбрано: <span id="selectedCountSpells">0</span> из {{ pending_spells.count }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center">
+                <i class="bi bi-check-circle"></i> Все заклинания проверены!
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="tab-pane fade" id="equipment" role="tabpanel">
+            {% if pending_equipment %}
+            <div class="card shadow">
+                <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-center w-100">
+                        <i class="bi bi-bag"></i> Снаряжение на модерации
+                        <span class="badge bg-danger ms-2">{{ pending_equipment.count }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'moderate_bulk' %}" id="equipmentForm">
+                        {% csrf_token %}
+                        <input type="hidden" name="content_type" value="equipment">
+
+                        <div class="table-responsive">
+                            <table class="table table-hover text-center align-middle">
+                                <thead>
+                                    <tr>
+                                        <th width="40" class="text-center">
+                                            <input type="checkbox" id="checkAllEquipment">
+                                        </th>
+                                        <th>Название</th>
+                                        <th>Вес / Стоимость</th>
+                                        <th>Информация</th>
+                                        <th>Автор</th>
+                                        <th>Дата создания</th>
+                                        <th>Действия</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in pending_equipment %}
+                                    <tr>
+                                        <td class="text-center">
+                                            <input type="checkbox" name="selected_items"
+                                                   value="{{ item.id }}" class="equipment-checkbox">
+                                        </td>
+                                        <td>
+                                            <strong>{{ item.name }}</strong>
+                                        </td>
+                                        <td>
+                                            {% if item.weight %}
+                                            <span class="badge bg-secondary">{{ item.weight }} фн.</span>
+                                            {% endif %}
+                                            {% if item.cost_quantity %}
+                                            <span class="badge bg-warning">
+                                                {{ item.cost_quantity }} {{ item.get_cost_unit_display }}
+                                            </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                Вес: {{ item.weight }} фн. | Цена: {{ item.cost_quantity }} {{ item.get_cost_unit_display }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            {% if item.created_by %}
+                                            <span class="badge bg-info">
+                                                {{ item.created_by.username }}
+                                            </span>
+                                            {% else %}
+                                            <span class="text-muted">Не указан</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small>{{ item.created_at|date:"d.m.Y H:i" }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm justify-content-center" role="group">
+                                                <a href="{% url 'equipment_detail' item.id %}"
+                                                   class="btn btn-outline-primary" target="_blank">
+                                                    <i class="bi bi-eye"></i> Просмотр
+                                                </a>
+                                                <button type="button" class="btn btn-outline-success approve-btn"
+                                                        data-type="equipment" data-id="{{ item.id }}">
+                                                    <i class="bi bi-check-lg"></i> Одобрить
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger reject-btn"
+                                                        data-type="equipment" data-id="{{ item.id }}">
+                                                    <i class="bi bi-x-lg"></i> Отклонить
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="card-footer bg-light">
+                            <div class="d-flex justify-content-center align-items-center">
+                                <div class="me-3">
+                                    <small class="text-muted">
+                                        Выбрано: <span id="selectedCountEquipment">0</span> из {{ pending_equipment.count }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center">
+                <i class="bi bi-check-circle"></i> Все снаряжение проверено!
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="tab-pane fade" id="approved" role="tabpanel">
+            <div class="row justify-content-center">
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white text-center">
+                            <h6 class="mb-0">
+                                <i class="bi bi-dragon"></i> Монстры
+                                <span class="badge bg-light text-dark float-end">{{ recently_approved.monsters|length }}</span>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% if recently_approved.monsters %}
+                            <div class="list-group list-group-flush">
+                                {% for monster in recently_approved.monsters %}
+                                <div class="list-group-item text-center">
+                                    <div class="d-flex flex-column justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ monster.name }}</strong>
+                                            <div class="small text-muted">
+                                                {{ monster.size }} | {{ monster.type }}
+                                            </div>
+                                        </div>
+                                        <a href="{% url 'monster_detail' monster.id %}"
+                                           class="btn btn-sm btn-outline-primary mt-2">
+                                            <i class="bi bi-eye"></i> Просмотр
+                                        </a>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted text-center">Нет одобренных монстров</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white text-center">
+                            <h6 class="mb-0">
+                                <i class="bi bi-stars"></i> Заклинания
+                                <span class="badge bg-light text-dark float-end">{{ recently_approved.spells|length }}</span>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% if recently_approved.spells %}
+                            <div class="list-group list-group-flush">
+                                {% for spell in recently_approved.spells %}
+                                <div class="list-group-item text-center">
+                                    <div class="d-flex flex-column justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ spell.name }}</strong>
+                                            <div class="small text-muted">
+                                                {{ spell.get_school_display }} |
+                                                {% if spell.level == 0 %}Заговор{% else %}{{ spell.level }} ур.{% endif %}
+                                            </div>
+                                        </div>
+                                        <a href="{% url 'spell_detail' spell.id %}"
+                                           class="btn btn-sm btn-outline-primary mt-2">
+                                            <i class="bi bi-eye"></i> Просмотр
+                                        </a>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted text-center">Нет одобренных заклинаний</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white text-center">
+                            <h6 class="mb-0">
+                                <i class="bi bi-bag"></i> Снаряжение
+                                <span class="badge bg-light text-dark float-end">{{ recently_approved.equipment|length }}</span>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            {% if recently_approved.equipment %}
+                            <div class="list-group list-group-flush">
+                                {% for item in recently_approved.equipment %}
+                                <div class="list-group-item text-center">
+                                    <div class="d-flex flex-column justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{{ item.name }}</strong>
+                                            <div class="small text-muted">
+                                                {% if item.cost_quantity %}
+                                                {{ item.cost_quantity }} {{ item.get_cost_unit_display }}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <a href="{% url 'equipment_detail' item.id %}"
+                                           class="btn btn-sm btn-outline-primary mt-2">
+                                            <i class="bi bi-eye"></i> Просмотр
+                                        </a>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <p class="text-muted text-center">Нет одобренного снаряжения</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function getCsrfToken() {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            if (name === 'csrftoken') {
+                return decodeURIComponent(value);
+            }
+        }
+        return '';
+    }
+
+    const csrfToken = getCsrfToken();
+
+    function setupCheckboxHandlers(selectAllBtnId, checkAllId, checkboxClass, counterId) {
+        const selectAllBtn = document.getElementById(selectAllBtnId);
+        const checkAll = document.getElementById(checkAllId);
+        const checkboxes = document.querySelectorAll(`.${checkboxClass}`);
+        const counter = document.getElementById(counterId);
+
+        function updateCounter() {
+            const checkedCount = document.querySelectorAll(`.${checkboxClass}:checked`).length;
+            if (counter) counter.textContent = checkedCount;
+        }
+        if (selectAllBtn) {
+            selectAllBtn.addEventListener('click', function() {
+                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                checkboxes.forEach(cb => {
+                    cb.checked = !allChecked;
+                });
+                if (checkAll) checkAll.checked = !allChecked;
+                updateCounter();
+            });
+        }
+        if (checkAll) {
+            checkAll.addEventListener('change', function() {
+                checkboxes.forEach(cb => {
+                    cb.checked = this.checked;
+                });
+                updateCounter();
+            });
+        }
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                const allChecked = Array.from(checkboxes).every(c => c.checked);
+                if (checkAll) checkAll.checked = allChecked;
+                updateCounter();
+            });
+        });
+
+        updateCounter();
+    }
+
+    setupCheckboxHandlers('selectAllMonsters', 'checkAllMonsters', 'monster-checkbox', 'selectedCountMonsters');
+    setupCheckboxHandlers('selectAllSpells', 'checkAllSpells', 'spell-checkbox', 'selectedCountSpells');
+    setupCheckboxHandlers('selectAllEquipment', 'checkAllEquipment', 'equipment-checkbox', 'selectedCountEquipment');
+
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('approve-btn') ||
+            (e.target.parentElement && e.target.parentElement.classList.contains('approve-btn'))) {
+            e.preventDefault();
+            const btn = e.target.classList.contains('approve-btn') ? e.target : e.target.parentElement;
+            const type = btn.dataset.type;
+            const id = btn.dataset.id;
+
+            const typeNames = {
+                'monster': 'монстра',
+                'spell': 'заклинание',
+                'equipment': 'снаряжение'
+            };
+
+            const typeName = typeNames[type] || 'элемент';
+
+            if (confirm(`Одобрить этот ${typeName}?`)) {
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+                btn.disabled = true;
+
+                fetch(`/admin-panel/approve/${type}/${id}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `csrfmiddlewaretoken=${encodeURIComponent(csrfToken)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const row = btn.closest('tr');
+                        if (row) {
+                            row.style.opacity = '0.5';
+                            setTimeout(() => {
+                                row.remove();
+                                updateTableCounters(type);
+                                location.reload();
+                            }, 500);
+                        }
+                        showToast('success', data.message);
+                    } else {
+                        showToast('error', `Ошибка: ${data.error}`);
+                        btn.innerHTML = originalHtml;
+                        btn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    showToast('error', `Ошибка сети: ${error}`);
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                });
+            }
+        }
+
+        if (e.target.classList.contains('reject-btn') ||
+            (e.target.parentElement && e.target.parentElement.classList.contains('reject-btn'))) {
+            e.preventDefault();
+            const btn = e.target.classList.contains('reject-btn') ? e.target : e.target.parentElement;
+            const type = btn.dataset.type;
+            const id = btn.dataset.id;
+
+            const typeNames = {
+                'monster': 'монстра',
+                'spell': 'заклинание',
+                'equipment': 'снаряжение'
+            };
+
+            const typeName = typeNames[type] || 'элемент';
+
+            if (confirm(`Отклонить этот ${typeName}? Это действие нельзя отменить.`)) {
+                const originalHtml = btn.innerHTML;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+                btn.disabled = true;
+
+                fetch(`/admin-panel/reject/${type}/${id}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `csrfmiddlewaretoken=${encodeURIComponent(csrfToken)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const row = btn.closest('tr');
+                        if (row) {
+                            row.style.opacity = '0.5';
+                            setTimeout(() => {
+                                row.remove();
+                                updateTableCounters(type);
+                                location.reload();
+                            }, 500);
+                        }
+                        showToast('success', data.message);
+                    } else {
+                        showToast('error', `Ошибка: ${data.error}`);
+                        btn.innerHTML = originalHtml;
+                        btn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    showToast('error', `Ошибка сети: ${error}`);
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                });
+            }
+        }
+    });
+
+    function updateTableCounters(type) {
+        const counters = {
+            'monster': {
+                badge: document.querySelector('#monsters-tab .badge'),
+                table: document.querySelectorAll('.monster-checkbox').length
+            },
+            'spell': {
+                badge: document.querySelector('#spells-tab .badge'),
+                table: document.querySelectorAll('.spell-checkbox').length
+            },
+            'equipment': {
+                badge: document.querySelector('#equipment-tab .badge'),
+                table: document.querySelectorAll('.equipment-checkbox').length
+            }
+        };
+
+        if (counters[type]) {
+            const counter = counters[type];
+            if (counter.badge) {
+                counter.badge.textContent = counter.table;
+            }
+        }
+    }
+
+    function showToast(type, message) {
+        let toastContainer = document.getElementById('toastContainer');
+        if (!toastContainer) {
+            toastContainer = document.createElement('div');
+            toastContainer.id = 'toastContainer';
+            toastContainer.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 9999;
+                max-width: 350px;
+            `;
+            document.body.appendChild(toastContainer);
+        }
+
+        const toastId = 'toast-' + Date.now();
+        const toast = document.createElement('div');
+        toast.id = toastId;
+        toast.className = `toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
+        toast.setAttribute('aria-atomic', 'true');
+
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">
+                    ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        `;
+
+        toastContainer.appendChild(toast);
+
+        const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+        bsToast.show();
+
+        toast.addEventListener('hidden.bs.toast', function() {
+            toast.remove();
+        });
+    }
+
+    const bulkForms = document.querySelectorAll('form[id$="Form"]');
+    bulkForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const selectedItems = this.querySelectorAll('input[name="selected_items"]:checked');
+            if (selectedItems.length === 0) {
+                e.preventDefault();
+                showToast('error', 'Выберите хотя бы один элемент.');
+                return;
+            }
+
+            const actionBtn = e.submitter;
+            const action = actionBtn.value;
+            const content_type = this.querySelector('input[name="content_type"]').value;
+
+            const typeNames = {
+                'monster': 'монстров',
+                'spell': 'заклинаний',
+                'equipment': 'предметов снаряжения'
+            };
+
+            const typeName = typeNames[content_type] || 'элементов';
+            const actionText = action === 'approve' ? 'одобрить' : 'отклонить';
+
+            if (!confirm(`Вы уверены, что хотите ${actionText} ${selectedItems.length} ${typeName}?`)) {
+                e.preventDefault();
+            } else {
+                actionBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Обработка...';
+                actionBtn.disabled = true;
+            }
+        });
+    });
+
+    const moderationTabs = document.querySelectorAll('#moderationTabs button[data-bs-toggle="tab"]');
+    moderationTabs.forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function(e) {
+            localStorage.setItem('activeModerationTab', e.target.id);
+        });
+    });
+
+    const activeTabId = localStorage.getItem('activeModerationTab');
+    if (activeTabId) {
+        const activeTab = document.getElementById(activeTabId);
+        if (activeTab) {
+            const tab = new bootstrap.Tab(activeTab);
+            tab.show();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const activeTabParam = urlParams.get('tab');
+
+        if (activeTabParam) {
+            const tabElement = document.getElementById(`${activeTabParam}-tab`);
+            if (tabElement) {
+                const tab = new bootstrap.Tab(tabElement);
+                tab.show();
+            }
+        }
+        const bulkForms = document.querySelectorAll('form[id$="Form"]');
+        bulkForms.forEach(form => {
+            form.addEventListener('submit', function() {
+                const activeTab = document.querySelector('#moderationTabs .nav-link.active');
+                if (activeTab) {
+                    const tabId = activeTab.id.replace('-tab', '');
+
+                    const originalAction = this.action;
+                    const separator = originalAction.includes('?') ? '&' : '?';
+                    this.action = originalAction + separator + 'tab=' + tabId;
+                }
+            });
+        });
+    });
+});
+</script>
+
+{% endblock %}
