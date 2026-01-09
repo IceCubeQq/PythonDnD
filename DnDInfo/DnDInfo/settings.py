@@ -3,9 +3,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-env_file = BASE_DIR / '.env.production'
-if not env_file.exists():
-    env_file = BASE_DIR / '.env'
+env_file = BASE_DIR / '.env'
 
 load_dotenv(env_file)
 
@@ -108,3 +106,4 @@ DND_API_URL = os.getenv('DND_API_URL', 'https://www.dnd5eapi.co/api/2014')
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
