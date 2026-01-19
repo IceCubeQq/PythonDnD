@@ -1,23 +1,9 @@
-from django.core.paginator import Paginator
-from django.db.models import Q
 from django.shortcuts import render, redirect
-from django.urls import reverse
-
 from ..models import Monster, Spell, Equipment
 
 
 def is_admin(user):
     return user.is_authenticated and user.is_staff
-
-def apply_filters(request, queryset):
-    search = request.GET.get('search', '')
-    if search:
-        queryset = queryset.filter(name__icontains=search)
-    sort_by = request.GET.get('sort', 'name')
-    if sort_by in ['name', 'hit_points', 'strength']:
-        queryset = queryset.order_by(sort_by)
-
-    return queryset
 
 def index(request):
     context = {
@@ -42,6 +28,4 @@ def index(request):
     }
     return render(request, 'DnDSite/index.html', context)
 
-def calculate_modifier(score):
-    return (score - 10) // 2
 

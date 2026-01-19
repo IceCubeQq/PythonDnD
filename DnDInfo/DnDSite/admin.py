@@ -23,8 +23,7 @@ class MonsterAdmin(admin.ModelAdmin):
 
 @admin.register(Spell)
 class SpellAdmin(admin.ModelAdmin):
-    list_display = ('name', 'level', 'school', 'ritual', 'concentration',
-                    'is_homebrew', 'is_approved', 'created_by', 'created_at')
+    list_display = ('name', 'level', 'school', 'ritual', 'concentration', 'is_homebrew', 'is_approved', 'created_by', 'created_at')
     list_filter = ('is_homebrew', 'is_approved', 'level', 'school', 'ritual', 'concentration')
     search_fields = ('name', 'desc', 'created_by__username')
     ordering = ('-is_homebrew', '-created_at', 'name')

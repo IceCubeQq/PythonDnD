@@ -34,13 +34,10 @@ class Monster(models.Model):
 
 class Spell(models.Model):
     LEVEL_COLORS = LEVEL_COLORS
-
     @property
     def is_cantrip(self):
         return self.level == 0
-
     SCHOOL_CHOICES = SCHOOLS
-
     name = models.CharField("Название", max_length=50)
     desc = models.TextField("Описание")
     spell_range  = models.TextField("Дальность")

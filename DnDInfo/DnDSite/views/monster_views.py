@@ -4,10 +4,10 @@ from django.db import transaction
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from ..services import MonsterService
-from ..constants import SORT_OPTIONS, TYPE_OPTIONS, SIZE_OPTIONS, SIZE_CHOICES, SPEED_EXAMPLES, SPEED_TYPES
-from ..forms import MonsterSpeedsForm, ArmorClassForm, MonsterForm, MonsterEditForm, SearchForm
+from ..constants import SORT_OPTIONS, TYPE_OPTIONS, SIZE_OPTIONS
+from ..forms import MonsterSpeedsForm, ArmorClassForm, MonsterForm, MonsterEditForm
 from ..models import Monster, Armor_class, Speed
-from .base_views import is_admin, calculate_modifier
+from .base_views import is_admin
 
 
 def monster_list(request):

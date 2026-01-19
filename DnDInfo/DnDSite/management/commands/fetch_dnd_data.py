@@ -10,11 +10,7 @@ class Command(BaseCommand):
     help = 'Загружает данные из D&D 5e API в базу данных'
 
     def add_arguments(self, parser):
-        parser.add_argument(
-            '--limit',
-            type=int,
-            default=20,
-            help='Количество записей каждого типа для загрузки (по умолчанию: 20)'
+        parser.add_argument('--limit', type=int, default=20, help='Количество записей каждого типа для загрузки (по умолчанию: 20)'
         )
 
     def handle(self, *args, **options):
@@ -25,7 +21,7 @@ class Command(BaseCommand):
 
         try:
             with transaction.atomic():
-                self.stdout.write('Загрузка монстров...')
+                self.stdout.write('Загрузка монстров')
                 monsters = importer.api_client.get_monsters_list()[:limit]
                 monster_count = 0
 
@@ -36,7 +32,7 @@ class Command(BaseCommand):
 
                 self.stdout.write(self.style.SUCCESS(f'Загружено монстров: {monster_count}'))
 
-                self.stdout.write('Загрузка заклинаний...')
+                self.stdout.write('Загрузка заклинаний')
                 spells = importer.api_client.get_spells_list()[:limit]
                 spell_count = 0
 
@@ -47,7 +43,7 @@ class Command(BaseCommand):
 
                 self.stdout.write(self.style.SUCCESS(f'Загружено заклинаний: {spell_count}'))
 
-                self.stdout.write('Загрузка снаряжения...')
+                self.stdout.write('Загрузка снаряжения')
                 equipment_list = importer.api_client.get_equipment_list()[:limit]
                 equipment_count = 0
 
@@ -58,13 +54,11 @@ class Command(BaseCommand):
 
                 self.stdout.write(self.style.SUCCESS(f'Загружено снаряжения: {equipment_count}'))
 
-                self.stdout.write(self.style.SUCCESS('\n' + '=' * 50))
                 self.stdout.write(self.style.SUCCESS('ИТОГ ЗАГРУЗКИ:'))
                 self.stdout.write(self.style.SUCCESS(f'Монстров: {monster_count}'))
                 self.stdout.write(self.style.SUCCESS(f'Заклинаний: {spell_count}'))
                 self.stdout.write(self.style.SUCCESS(f'Снаряжения: {equipment_count}'))
                 self.stdout.write(self.style.SUCCESS(f'Всего записей: {monster_count + spell_count + equipment_count}'))
-                self.stdout.write(self.style.SUCCESS('=' * 50))
 
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'Ошибка при загрузке данных: {e}'))
