@@ -140,6 +140,7 @@ DND_API_URL=https://www.dnd5eapi.co/api''')
 ### 5. Примените миграции:
 
 python manage.py makemigrations DnDSite
+
 python manage.py migrate
 
 ### 6. Загрузите данные из D&D 5e API (довольно долго. При желании можете уменьшить количество данных):
@@ -225,4 +226,5 @@ Armor_class - типы брони монстров
 Speed - скорости перемещения
 
 Component - компоненты заклинаний
+
 
