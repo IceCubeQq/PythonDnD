@@ -119,28 +119,30 @@ source venv/bin/activate
 
 ### 3. Установите зависимости:
 cd PythonDnD/DnDInfo
+
 pip install -r requirements.txt
 
 ### 4. Настройте переменные окружения:
 
 # Создайте файл .env:
 python -c "
->> import string
->> chars = string.ascii_letters + string.digits + '!@$%^&*()_-+=<>?/|[]{}~'
->> key = ''.join(secrets.choice(chars) for _ in range(50))
->> with open('.env', 'w', encoding='utf-8') as f:
->>     f.write(f'''SECRET_KEY={key}
->> DEBUG=True
->> ALLOWED_HOSTS=localhost,127.0.0.1,IceCubeQ.pythonanywhere.com
->> DND_API_URL=https://www.dnd5eapi.co/api''')
->> "
+import string
+import secrets
+chars = string.ascii_letters + string.digits + '!@$%^&*()_-+=<>?/|[]{}~'
+key = ''.join(secrets.choice(chars) for _ in range(50))
+with open('.env', 'w', encoding='utf-8') as f:
+    f.write(f'''SECRET_KEY={key}
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1,IceCubeQ.pythonanywhere.com
+DND_API_URL=https://www.dnd5eapi.co/api''')
+"
 
 ### 5. Примените миграции:
 
 python manage.py makemigrations DnDSite
 python manage.py migrate
 
-### 6. Загрузите данные из D&D 5e API (довольно долго):
+### 6. Загрузите данные из D&D 5e API (довольно долго. При желании можете уменьшить количество данных):
 
 python manage.py fetch_dnd_data --limit 350 
 
@@ -223,3 +225,4 @@ Armor_class - типы брони монстров
 Speed - скорости перемещения
 
 Component - компоненты заклинаний
+
