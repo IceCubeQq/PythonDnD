@@ -1,4 +1,4 @@
-from .base_views import is_admin, apply_filters, index, calculate_modifier
+from .base_views import is_admin, index
 from .auth_views import custom_login, register, custom_logout, admin_login_redirect
 from .monster_views import monster_list, monster_detail, add_monster, edit_monster, delete_monster
 from .spell_views import spell_list, spell_detail, add_spell, edit_spell, delete_spell
