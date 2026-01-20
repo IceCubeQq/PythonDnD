@@ -126,15 +126,25 @@ pip install -r requirements.txt
 
 # Создайте файл .env:
 python -c "
+
 import string
+
 import secrets
+
 chars = string.ascii_letters + string.digits + '!@$%^&*()_-+=<>?/|[]{}~'
+
 key = ''.join(secrets.choice(chars) for _ in range(50))
+
 with open('.env', 'w', encoding='utf-8') as f:
+
     f.write(f'''SECRET_KEY={key}
+    
 DEBUG=True
+
 ALLOWED_HOSTS=localhost,127.0.0.1,IceCubeQ.pythonanywhere.com
+
 DND_API_URL=https://www.dnd5eapi.co/api''')
+
 "
 
 ### 5. Примените миграции:
@@ -226,5 +236,6 @@ Armor_class - типы брони монстров
 Speed - скорости перемещения
 
 Component - компоненты заклинаний
+
 
 
