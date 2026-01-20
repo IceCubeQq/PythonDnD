@@ -136,7 +136,6 @@ chars = string.ascii_letters + string.digits + '!@$%^&*()_-+=<>?/|[]{}~'
 key = ''.join(secrets.choice(chars) for _ in range(50))
 
 with open('.env', 'w', encoding='utf-8') as f:
-
     f.write(f'''SECRET_KEY={key}
     
 DEBUG=True
@@ -236,6 +235,7 @@ Armor_class - типы брони монстров
 Speed - скорости перемещения
 
 Component - компоненты заклинаний
+
 
 
 
